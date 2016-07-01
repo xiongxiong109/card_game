@@ -1,0 +1,34 @@
+{
+  "name": "fanfanhappy",
+  "description": "H5翻牌签到",
+  "main": "index.html",
+  "authors": [
+    "xiongxiong109"
+  ],
+  "license": "ISC",
+  "keywords": [
+    "html5",
+    "fis3",
+    "webpack",
+    "es6",
+    "babel"
+  ],
+  "homepage": "https://github.com/xiongxiong109/card_game",
+  "moduleType": [
+    "es6",
+    "node"
+  ],
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "bower_lib/",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "jquery": "^3.0.0",
+    "zepto": "^1.1.6",
+    "underscore": "^1.8.3"
+  }
+}
