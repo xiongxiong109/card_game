@@ -1,0 +1,50 @@
+// animations
+
+// loading-shake
+
+@-webkit-keyframes loading-shake {
+
+	0%, 100% {
+		-webkit-transform: translateY(0%) rotateZ(-5deg);
+	}
+	33% {
+		-webkit-transform: translateY(5%) rotateZ(10deg);
+	}
+	66% {
+		-webkit-transform: translateY(-5%) rotateZ(0deg);
+	}
+
+}
+
+@keyframes loading-shake {
+
+	0%, 100% {
+		transform: translateY(0%) rotateZ(-5deg);
+	}
+	33% {
+		transform: translateY(5%) rotateZ(10deg);
+	}
+	66% {
+		transform: translateY(-5%) rotateZ(0deg);
+	}
+
+}
+
+// loading-shadow
+
+@-webkit-keyframes loading-shadow {
+
+	0%, 100% {
+			opacity: 1;
+			transform: scale(1);
+		}
+		33% {
+			opacity: 1;
+			transform: scale(1.2);
+		}
+		66% {
+			opacity: 0.6;
+			transform: scale(0.8);
+		}
+
+}

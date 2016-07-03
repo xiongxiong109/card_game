@@ -1,5 +1,132 @@
 @import url("./est/all.less");
+@import url("./animation.less");
+
+// 自适应等比缩放mixin, 将尺寸全体缩放成百分比
+.responseSize(@width, @height) {
+	@realWidth: 750;
+	@realHeight: 1334;
+
+	.size(@width / @realWidth * 100%, @height / @realHeight * 100%);
+
+}
 
 .global-reset();
 
-body {font-family:'Microsoft Yahei','Simsun','Helvetica';}
+html, body {
+	height: 100%;
+}
+body {
+	font-family:'Microsoft Yahei','Simsun','Helvetica';
+	height: 100%;
+	overflow: hidden;
+	position: relative;
+}
+
+@import url("./loading.less");
+
+.resize-wrap {
+	position: absolute;
+	top: 0;
+	bottom: 0;
+	left: 0;
+	right: 0;
+	margin:auto;
+	background: #29213a url("/assets/img/main_bg.jpg") center center no-repeat;
+	background-size: cover;
+	overflow: hidden;
+}
+
+.main-wrap {
+	position: absolute;
+	width: 100%;
+	height: 100%;
+	top: 0;
+	left: 0;
+
+	a, div {
+		display: block;
+		position: absolute;
+	}
+	.close-btn {
+		width: 4.8%;
+		padding-top: 4.8%;
+		background: url("/assets/img/close_btn.png")  center center no-repeat;
+		background-size: cover;
+		top: 2.99%;
+		left: 5.3%;
+	}
+	.cup-box {
+		.responseSize(472, 340);
+		left: 0;
+		right: 0;
+		top: 0;
+		margin: auto;
+		background: url("/assets/img/cup.png") center center no-repeat;
+		background-size: cover;
+	}
+	.bar-box {
+		.responseSize(596, 99);
+		left: 0;
+		right: 0;
+		top: 10.3%;
+		margin: auto;
+		background: url("/assets/img/bar.png") center center no-repeat;
+		background-size: cover;
+	}
+	.counter-box {
+		.size(100%, auto);
+		left: 0;
+		top: 18.74%;
+		font-size: 12px;
+		color: #fff;
+		text-align: center;
+		em {
+			font-size: 14px;
+			padding: 0 5px;
+		}
+	}
+}
+
+.card-box-wrap {
+	.responseSize(687, 798);
+	top: 22.26%;
+	left: 0;
+	right: 0;
+	margin: auto;
+	border-radius: 4px;
+	background: #fff8e3;
+	.card-box-list {
+		.size(97%);
+		position: absolute;
+		top: 0;
+		left: 0;
+		right: 0;
+		bottom: 0;
+		margin: auto;
+		background-color: #ccc;
+		border-radius: 4px;
+		overflow: hidden;
+	}
+}
+
+.footer-tip-box {
+	width: 88%;
+	top: 86.7%;
+	left: 0;
+	right: 0;
+	margin: auto;
+	color: #fff;
+	font-size: 12px;
+	line-height: 22 / 12em;
+	a {
+		.inline-block();
+		padding:0 18px;
+		color: #6ac18a;
+		&:active {
+			color: #6ac18a * 0.8;
+		}
+	}
+	p:last-of-type {
+		padding-top: 4px;
+	}
+}

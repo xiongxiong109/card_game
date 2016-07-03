@@ -1,0 +1,32 @@
+// loading
+
+.loading-wrap {
+	.size(100%);
+	position: absolute;
+	background: #edc300;
+	.display(box);
+	.box-align(center);
+	.box-pack(center);
+	display: none;
+}
+
+.loading-box {
+	width: 100px;
+	text-align: center;
+
+	.loading-baby {
+		.animation(loading-shake 1s linear infinite);
+		width: 100px;
+	}
+	.loading-shadow {
+		.inline-block();
+		.size(70px, 10px);
+		.border-top-left-radius(80px 15px);
+		.border-top-right-radius(80px 15px);
+		.border-bottom-right-radius(80px 15px);
+		.border-bottom-left-radius(80px 15px);
+		margin-left: 10px;
+		background-color: #dcb20d;
+		.animation(loading-shadow 1s linear infinite);
+	}
+}
