@@ -60,10 +60,10 @@
 	// 游戏配置
 	var gameConfig = {
 
-				num: 4, // 切分块数
+				num: 2, // 切分块数
 				bgImg: __uri("/assets/img/gift.jpg"), // 大奖图片
 				houseImg: __uri("/assets/img/house.jpg"), // 楼盘图片
-				curIdx: 13, // 当前可以翻动的块(连续第几天签到)
+				curIdx: 0, // 当前可以翻动的块(连续第几天签到)
 				canFlip: true, // 是否可以翻动(今天是否已签到)
 				uId: 123, // 当前抽奖用户的id, 用于与后端交互
 
@@ -99,6 +99,7 @@
 
 																$cardList: $(".card-box-list"),
 																$counterNum: $(".counter-box em"),
+																$loadingWrap: $(".loading-wrap"),
 																$maskWrap: $(".mask-wrap"),
 																$maskCard: $(".mask-card"),
 																$maskClose: $(".mask-close"),
@@ -117,10 +118,14 @@
 																var _this = this;
 																var d = _this.doms;
 																var o = _this.opt;
+																var t = _this.timeLine;
+
 																// 大奖图片
 																var bgImg = o.bgImg;
 																// 活动楼盘图片
 																var houseImg = o.houseImg;
+
+																d.$loadingWrap.delay(1000).fadeOut();
 
 																// 创建拼图
 																_this.createCardItems(_this.opt.num, houseImg, function () {
