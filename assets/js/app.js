@@ -6,14 +6,15 @@ require('./modules/resize');
 require('tweenMax');
 
 // 游戏配置
-const Game_CONFIG = {
+let gameConfig = {
 
 	num: 4, // 切分块数
 	bgImg: __uri("/assets/img/gift.jpg"), // 大奖图片
 	houseImg: __uri("/assets/img/house.jpg"), // 楼盘图片
-	curIdx: 2, // 当前可以翻动的块(连续第几天签到)
+	curIdx: 13, // 当前可以翻动的块(连续第几天签到)
 	canFlip: true, // 是否可以翻动(今天是否已签到)
 	uId: 123, // 当前抽奖用户的id, 用于与后端交互
+
 	ajaxConf: { // ajax提交的配置
 
 		sign: { // 签到提交
@@ -37,9 +38,19 @@ const Game_CONFIG = {
 		constructor(opt) {
 
 			this.opt = opt;
+			// 时间轴动画实例
+			this.timeLine = new TimelineMax();
+
 			this.doms = {
+
 				$cardList: $(".card-box-list"),
-				$counterNum: $(".counter-box em")
+				$counterNum: $(".counter-box em"),
+				$maskWrap: $(".mask-wrap"),
+				$maskCard: $(".mask-card"),
+				$maskClose: $(".mask-close"),
+				$maskFnBtn: $(".mask-fn-btn"),
+				$maskImg: $(".mask-img-wrap img")
+
 			}
 
 		}
@@ -176,6 +187,7 @@ const Game_CONFIG = {
 			var _this = this;
 			var d = _this.doms;
 			var o = _this.opt;
+			var t = _this.timeLine;
 
 			var isRunning = false;
 
@@ -208,21 +220,91 @@ const Game_CONFIG = {
 				// });
 
 				// 对该块进行动画操作
-				// _this.AnimateGoMove($self);
+				_this.AnimateGoRotate($self);
+
+			});
+
+			// 给结果面板的关闭按钮绑定点击事件
+			d.$maskClose.on('click', function() {
+
+				t.to(d.$maskCard, .5, {
+
+					rotationX: 270,
+					rotationY: 180,
+					scale: 0,
+					ease: Back.easeIn.config(1.2),
+					onComplete: function() {
+
+						d.$maskWrap.fadeOut(200);
+
+					}
+
+				});
 
 			});
 
 		}
+
+		AnimateGoRotate($card) {
+
+			let _this = this;
+			let d = _this.doms;
+			let t = _this.timeLine;
+
+			// 让卡片的层级处于所有卡片的最高等级
+			$card.css('zIndex', Math.pow(_this.opt.num, 2));
+
+			// 卡片旋转
+			t.add('rotateAndMove');
+			t.to($card, 1, {
+				rotationY: 720,
+				left: (d.$cardList.width() - $card.width()) / 2 + 'px',
+				top: (d.$cardList.height() - $card.height()) / 2 + 'px',
+				ease: Power1.easeOut
+			});
+
+			t.add('scaleToNone');
+			t.to($card, .5, {
+				rotationX: 360,
+				scale: 0,
+				onComplete: function() {
+					// ajax获取抽奖结果后, 弹出获奖框
+					_showRst();
+				}
+			});
+
+			// 显示抽奖结果
+			function _showRst() {
+
+				d.$maskWrap.fadeIn(100, function() {
+
+					t.to(d.$maskCard, 0, {
+						scale: 0,
+						opacity: 0,
+						rotationX: 360
+					});
+
+					t.to(d.$maskCard, .4, {
+						scale: 1,
+						opacity: 1,
+						rotationX: 0,
+						ease: Back.easeOut.config(0.6)
+					});
+
+				});
+
+			}
+		}
 	}
 
-	let cardGame = new Game(Game_CONFIG);
+	let cardGame = new Game(gameConfig);
 
 	cardGame.createCardPanel();
 
 	// 窗口大小改变时, 重置卡片的宽高
 	$(window).on('resize', function() {
 
-		cardGame.reStyleCardItems(Game_CONFIG.num, Game_CONFIG.houseImg);
+		cardGame.reStyleCardItems(gameConfig.num, gameConfig.houseImg);
 
 	});
 }
