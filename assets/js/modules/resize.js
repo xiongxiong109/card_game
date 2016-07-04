@@ -50,11 +50,25 @@
 				d.$resizeWrap.width('100%');
 				d.$resizeWrap.height( d.$resizeWrap.width() / _this.ratio );
 
+				if (d.$resizeWrap.height() > curH) {
+
+					d.$resizeWrap.height('100%');
+					d.$resizeWrap.width( d.$resizeWrap.height() * _this.ratio );
+
+				}
+
 			} else {
 
 				d.$resizeWrap.height('100%');
 				d.$resizeWrap.width( d.$resizeWrap.height() * _this.ratio );
 				
+				if (d.$resizeWrap.width() > curW) {
+
+					d.$resizeWrap.width('100%');
+					d.$resizeWrap.height( d.$resizeWrap.width() / _this.ratio );
+					
+				}
+
 			}
 
 

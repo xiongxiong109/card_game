@@ -11,16 +11,17 @@
 	<meta content="black" name="apple-mobile-web-app-status-bar-style" />
 	<meta content="telephone=no" name="format-detection" />
 	<meta content="email=no" name="format-detection" />
-	<title>Hello World</title>
+	<title>翻翻乐</title>
 	<link rel="stylesheet" type="text/css" href="assets/css/style.less">
 </head>
 <body>
+	<!-- 主页 -->
 	<div class="resize-wrap">
 		<div class="main-wrap">
 			<a href="javascript:void(0);" class="close-btn"></a>
 			<div class="cup-box"></div>
 			<div class="bar-box"></div>
-			<div class="counter-box">剩余<em>9</em>天</div>
+			<div class="counter-box">剩余<em>?</em>天</div>
 			<div class="card-box-wrap">
 				<div class="card-box-list"></div>
 			</div>
@@ -29,13 +30,38 @@
 				<p>本次大奖提供方：合景叠彩园<a href="javascript:void(0);" class="go-house">查看楼盘</a></p>
 			</div>
 		</div>
+		<!-- 中奖提示mask -->
+		<div class="mask-wrap">
+			<div class="mask-card">
+				<div class="mask-close"></div>
+				<div class="mask-img-wrap">
+					<img src="assets/img/special.png">
+					<i class="shadow"></i>
+				</div>
+				<div class="mask-rst-wrap">
+					<!-- <p>很遗憾，今天什么都没捞着！</p> -->
+					<p>恭喜您，获得<em>“鲁花花生油一瓶”</em>奖励!</p>
+					<p>为自己的坚持点个赞吧!</p>
+				</div>
+				<div class="mask-fn-btn">
+					<p>查看奖励</p>
+				</div>
+				<div class="mask-tip">
+					<p>领取规则见“我的奖励”</p>
+				</div>
+			</div>
+		</div>
+		<!-- 中奖提示mask end -->
 	</div>
+	<!-- 主页end -->
+	<!-- loading -->
 	<div class="loading-wrap">
 		<div class="loading-box">
 			<img src="assets/img/special.png" class="loading-baby">
 			<i class="loading-shadow"></i>
 		</div>
 	</div>
+	<!-- loading end -->
 	<script type="text/javascript" src="assets/js/app_bundle.js"></script>
 </body>
 </html>

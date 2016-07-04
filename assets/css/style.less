@@ -23,7 +23,7 @@ body {
 }
 
 @import url("./loading.less");
-
+@import url("./mask.less");
 .resize-wrap {
 	position: absolute;
 	top: 0;
@@ -77,11 +77,11 @@ body {
 		.size(100%, auto);
 		left: 0;
 		top: 18.74%;
-		font-size: 12px;
+		font-size: 14px;
 		color: #fff;
 		text-align: center;
 		em {
-			font-size: 14px;
+			font-size: 1.14em;
 			padding: 0 5px;
 		}
 	}
@@ -94,7 +94,7 @@ body {
 	right: 0;
 	margin: auto;
 	border-radius: 4px;
-	background: #fff8e3;
+	background-color: #fff8e3;
 	.card-box-list {
 		.size(97%);
 		position: absolute;
@@ -104,8 +104,19 @@ body {
 		bottom: 0;
 		margin: auto;
 		background-color: #ccc;
-		border-radius: 4px;
+		background-repeat: no-repeat;
+		background-position: center center;
+		background-size: cover;
+		border-radius: 8px;
 		overflow: hidden;
+	}
+	.card-item {
+		background-repeat: no-repeat;
+		// 添加可以翻动的样式
+		&.can-flip {
+			.box-shadow(0px 0px 0px 2px #edce00);
+			.animation(flash-shadow 1s linear infinite);
+		}
 	}
 }
 
@@ -116,8 +127,8 @@ body {
 	right: 0;
 	margin: auto;
 	color: #fff;
-	font-size: 12px;
-	line-height: 22 / 12em;
+	font-size: 14px;
+	line-height: 24 / 14em;
 	a {
 		.inline-block();
 		padding:0 18px;

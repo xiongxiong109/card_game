@@ -1,0 +1,72 @@
+// 弹框遮罩
+.mask-wrap {
+	.absolute(0, _, _, 0);
+	.size(100%);
+	background: rgba(21, 17, 30, 0.5);
+	display: none;
+	.mask-card {
+		.absolute(0,0,0,0);
+		.responseSize(550, 700);
+		background: #edc300 url("/assets/img/mask_card_bg.png") center 6.8% no-repeat;
+		background-size: 81%;
+		margin: auto;
+		border-radius: 5px;
+		.mask-close {
+			.size(7.2%, 6.4%);
+			.absolute(0, 7.2%, _, _);
+			background: url("/assets/img/mask_card_close.png") center center no-repeat;
+			background-size: 100%;
+		}
+		.mask-img-wrap {
+			text-align: center;
+			padding-top: 6.14%;
+			img {
+				width: 37%;
+				margin: auto;
+				display: block;
+				.animation(loading-shake 1s linear infinite);
+			}
+			i.shadow {
+				.inline-block();
+				.size(30%, 10px);
+				.border-top-left-radius(80px 15px);
+				.border-top-right-radius(80px 15px);
+				.border-bottom-right-radius(80px 15px);
+				.border-bottom-left-radius(80px 15px);
+				.animation(loading-shadow 1s linear infinite);
+				margin-top: 5%;
+				background-color: #dcb20d;
+			}
+		}
+		.mask-rst-wrap {
+			color: #fff;
+			font-size: 14px;
+			text-align: center;
+			line-height: 24px;
+			padding-top: 10%;
+			p {
+				.ellipsis(2);
+			}
+			em {
+				color: #fe4c11;
+			}
+		}
+		.mask-fn-btn {
+			.size(282 / 550 * 100%, 74 / 700 * 100%);
+			.display(box);
+			.box-pack(center);
+			.box-align(center);
+			margin:9.28% auto 0;
+			color: #ffe4be;
+			font-size: 16px;
+			background: url("/assets/img/mask_card_btn.png") center center no-repeat;
+			background-size: contain;
+		}
+		.mask-tip {
+			text-align: center;
+			color: #c04d00;
+			font-size: 14px;
+			padding-top: 4.28%;
+		}
+	}
+}
