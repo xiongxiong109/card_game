@@ -259,6 +259,24 @@ let gameConfig = {
 			// 让卡片的层级处于所有卡片的最高等级
 			$card.css('zIndex', Math.pow(_this.opt.num, 2));
 
+			// 卡片抖动
+			t.add('shake');
+
+			t.to($card, .2, {
+				rotationY: 15,
+				ease: Back.easeIn
+			})
+			.to($card, .2, {
+				rotationY: -15,
+				ease: Back.easeOut
+			})
+			.to($card, .2, {
+				rotationY: 0
+			})
+			.to($card, .2, {
+				rotationY: 0
+			}, .6);
+
 			// 卡片旋转
 			t.add('rotateAndMove');
 			t.to($card, 1, {
