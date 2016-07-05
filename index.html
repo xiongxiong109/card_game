@@ -21,7 +21,7 @@
 			<a href="javascript:void(0);" class="close-btn"></a>
 			<div class="cup-box"></div>
 			<div class="bar-box"></div>
-			<div class="counter-box">剩余<em>?</em>天</div>
+			<div class="counter-box">剩余<em>?</em>天<a href="javascript:void(0);" class="switch-card">换一张</a></div>
 			<div class="card-box-wrap">
 				<div class="card-box-list"></div>
 			</div>
@@ -30,12 +30,13 @@
 				<p>本次大奖提供方：合景叠彩园<a href="javascript:void(0);" class="go-house">查看楼盘</a></p>
 			</div>
 		</div>
-		<!-- 中奖提示mask -->
+		<!-- 提示遮罩mask -->
 		<div class="mask-wrap">
+			<!-- 中奖结果卡片 -->
 			<div class="mask-card">
 				<div class="mask-close"></div>
 				<div class="mask-img-wrap">
-					<img src="assets/img/special.png">
+					<img src="assets/img/special.png" id="rstImg">
 					<i class="shadow"></i>
 				</div>
 				<div class="mask-rst-wrap">
@@ -50,8 +51,30 @@
 					<p>领取规则见“我的奖励”</p>
 				</div>
 			</div>
+			<!-- 中奖结果卡片end -->
+			<!-- 遮罩loading -->
+			<div class="mask-loading">
+				<div class="mask-img-wrap">
+					<img src="assets/img/special.png">
+				</div>
+			</div>
+			<!-- 遮罩loading end -->
+			<!-- 对话框遮罩 -->
+			<div class="mask-dialog">
+				<div class="dialog-box">
+					<div class="dialog-txt">
+						<p>当前城市与上次翻牌城市不一致！</p>
+						<p>是否切换回翻牌城市继续翻牌？</p>
+					</div>
+					<div class="dialog-btn-wrap">
+						<a href="javascript:void(0);" class="btn-confirm">切换</a>
+						<a href="javascript:void(0);" class="btn-cancel">否</a>
+					</div>
+				</div>
+			</div>
+			<!-- 对话框遮罩 end -->
 		</div>
-		<!-- 中奖提示mask end -->
+		<!-- 提示遮罩mask end -->
 	</div>
 	<!-- 主页end -->
 	<!-- loading -->

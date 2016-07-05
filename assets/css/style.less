@@ -23,6 +23,7 @@ body {
 	overflow: hidden;
 	position: relative;
 	background-color: #29213a;
+	-webkit-tap-highlight-color:rgba(0,0,0,0);
 }
 
 @import url("./loading.less");
@@ -77,15 +78,28 @@ body {
 		background-size: cover;
 	}
 	.counter-box {
-		.size(100%, auto);
+		.size(91.6%, auto);
+		.clearfix();
 		left: 0;
+		right: 0;
 		top: 18.74%;
+		margin: auto;
 		font-size: 12px;
+		line-height: 16px;
 		color: #fff;
 		text-align: center;
 		em {
 			font-size: 1.14em;
 			padding: 0 5px;
+		}
+		.switch-card {
+			right: 0;
+			top: 0;
+			color: #5ca17a;
+			text-decoration: none;
+			&:active {
+				color: lighten(#5ca17a, 10%);
+			}
 		}
 	}
 }
@@ -115,6 +129,7 @@ body {
 		overflow: hidden;
 	}
 	.card-item {
+		background-color: #ccc;
 		background-repeat: no-repeat;
 		// 添加可以翻动的样式
 		&.can-flip {

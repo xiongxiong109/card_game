@@ -11,7 +11,7 @@ let gameConfig = {
 	num: 2, // 切分块数
 	bgImg: __uri("/assets/img/gift.jpg"), // 大奖图片
 	houseImg: __uri("/assets/img/house.jpg"), // 楼盘图片
-	curIdx: 0, // 当前可以翻动的块(连续第几天签到)
+	curIdx: 1, // 当前可以翻动的块(连续第几天签到)
 	canFlip: true, // 是否可以翻动(今天是否已签到)
 	uId: 123, // 当前抽奖用户的id, 用于与后端交互
 
@@ -47,13 +47,71 @@ let gameConfig = {
 				$counterNum: $(".counter-box em"),
 				$loadingWrap: $(".loading-wrap"),
 				$maskWrap: $(".mask-wrap"),
-				$maskCard: $(".mask-card"),
+				$maskCard: $(".mask-card"), // 卡片
 				$maskClose: $(".mask-close"),
 				$maskFnBtn: $(".mask-fn-btn"),
-				$maskImg: $(".mask-img-wrap img")
+				$rstImg: $("#rstImg"),
+				$maskLoading: $(".mask-loading"), // loading
+				$maskDialogWrap: $(".mask-dialog"), // 对话框
+				$dialogBox: $(".dialog-box"),
+				$dialogBtnWrap: $(".dialog-btn-wrap"),
+				$dialogTxt: $(".dialog-txt")
 
 			}
 
+		}
+
+		// 初始化
+		init() {
+
+			var _this = this;
+			var d = _this.doms;
+			var o = _this.opt;
+			var t = _this.timeLine;
+
+			d.$loadingWrap.delay(500).fadeOut();
+			// d.$loadingWrap.hide();
+
+			_this.initAjaxConfig();
+
+			_this.showDialog({
+				txt: '<p>当前所在城市与之前不一致!</p><p>是否切换到之前城市?</p>',
+				confirmOnly: false,
+				confirmTxt: '切换',
+				cancelTxt: '否',
+				confirm: function() {
+					_this.createCardPanel();
+				}
+			});
+
+		}
+
+		initAjaxConfig() { // ajax配置
+
+			var _this = this;
+			var d = _this.doms;
+
+			$.ajaxSetup({
+
+				url: '/',
+				type: 'get',
+				dataType: 'json',
+				data: {},
+				beforeSend: function() {
+
+					d.$maskWrap.show();
+					d.$maskLoading.show();
+
+				},
+				complete: function() {
+
+					d.$maskWrap.hide();
+					d.$maskLoading.hide();
+
+				}
+
+			});
+			
 		}
 
 		// 创建卡牌面板, 通过ajax获取响应的展示图片
@@ -69,8 +127,6 @@ let gameConfig = {
 			var bgImg = o.bgImg;
 			// 活动楼盘图片
 			var houseImg = o.houseImg;
-
-			d.$loadingWrap.delay(1000).fadeOut();
 
 			// 创建拼图
 			_this.createCardItems(_this.opt.num, houseImg, function() {
@@ -168,7 +224,7 @@ let gameConfig = {
 
 					if (idx < o.curIdx) {
 
-						$(ele).css('background-image', 'none');
+						$(ele).hide();
 
 					}
 
@@ -201,31 +257,36 @@ let gameConfig = {
 
 				let $self = $(this);
 
-				// 签到ajax配置
-				let _ajax = $.extend({}, o.ajaxConf.sign, {
-					data: {
-						uId: o.uId
-					}
-				}) ; 
-
 				$self.removeClass('can-flip');
 
-				// ajax签到抽奖
-				// $.ajax(_ajax)
-				// .done(function(data) {
+				// 签到ajax配置
+				let _ajax = $.extend({}, o.ajaxConf.sign, {
 
-				// 	console.log(data);
+					data: {
+						uId: o.uId
+					},
 
-				// })
-				// .fail(function(xhr, status, err) {
+					success: function(data) {
 
-				// 	console.log(err);
-				// 	$self.addClass('can-flip');
+						// 对该块进行动画操作
+						_this.AnimateGoRotate($self);
 
-				// });
+					},
+
+					error: function(xhr, status, err) {
+
+						console.log(err);
+						$self.addClass('can-flip');
+
+					}
+
+				});
 
 				// 对该块进行动画操作
 				_this.AnimateGoRotate($self);
+
+				// ajax签到抽奖
+				// $.ajax(_ajax);
 
 			});
 
@@ -235,8 +296,8 @@ let gameConfig = {
 				t.to(d.$maskCard, .5, {
 
 					rotationX: 270,
-					rotationY: 180,
 					scale: 0,
+					opacity: 0,
 					ease: Back.easeIn.config(1.2),
 					onComplete: function() {
 
@@ -283,6 +344,8 @@ let gameConfig = {
 
 				d.$maskWrap.fadeIn(100, function() {
 
+					d.$maskCard.show();
+
 					t.to(d.$maskCard, 0, {
 						scale: 0,
 						opacity: 0,
@@ -300,11 +363,120 @@ let gameConfig = {
 
 			}
 		}
+
+		// 显示弹框
+		showDialog(opt) {
+
+			var _this = this;
+			var d = _this.doms;
+			var t = _this.timeLine;
+
+			var defaults = {
+				txt: '<p>弹框提示</p>', // 弹框提示文本(html)
+				confirmOnly: false, // 是否只有确认按钮
+				confirmTxt: '确认',
+				cancelTxt: '取消',
+				confirm: null,
+				cancel: null
+			}
+
+			var opt = $.extend({}, defaults, opt);
+			var btnStr;
+
+			// 填充内容
+			d.$dialogTxt.html(opt.txt);
+
+			if (opt.confirmOnly) { // 如果只有确认按钮
+
+				btnStr = `<a href="javascript:void(0);" class="btn-confirm btn-block">${opt.confirmTxt}</a>`;
+
+			} else {
+
+				btnStr = `
+					<a href="javascript:void(0);" class="btn-confirm">${opt.confirmTxt}</a>
+					<a href="javascript:void(0);" class="btn-cancel">${opt.cancelTxt}</a>
+				`;
+
+			}
+
+			d.$dialogBtnWrap.html(btnStr);
+
+			// 显示弹框
+			_animateShowDialog();
+
+			// 关闭弹框
+			d.$dialogBtnWrap.delegate('.btn-confirm', 'click', function() {
+
+				_animateHideDialog(function() {
+
+					opt.confirm && opt.confirm();
+
+				});
+
+			});
+
+			d.$dialogBtnWrap.delegate('.btn-cancel', 'click', function() {
+
+				_animateHideDialog(function() {
+
+					opt.cancel && opt.cancel();
+
+				});
+
+			});
+
+			// 显示弹框动画
+			function _animateShowDialog() {
+
+				d.$maskWrap.show();
+				d.$maskDialogWrap.fadeIn(function() {
+
+					d.$dialogBox.show();
+
+					t.to(d.$dialogBox, 0, {
+						rotationY: 180,
+						opacity: 0
+					})
+					.to(d.$dialogBox, 0, {
+						rotationY: 180,
+						opacity:0
+					}, .4)
+					.to(d.$dialogBox, .5, {
+						rotationY: 0,
+						opacity: 1,
+						ease: Back.easeOut.config(0.8)
+					});
+
+				});
+
+			}
+
+			// 关闭弹框动画
+			function _animateHideDialog(cb) {
+
+				t.to(d.$dialogBox, .5, {
+					rotationY: 180,
+					opacity:0,
+					ease: Back.easeIn.config(0.8),
+					onComplete: function() {
+
+						d.$dialogBox.hide();
+						d.$maskDialogWrap.hide();
+						d.$maskWrap.hide();
+
+						cb && cb();
+					}
+				});
+
+			}
+
+		}
 	}
 
 	let cardGame = new Game(gameConfig);
-
-	cardGame.createCardPanel();
+	// alert($(window).width());
+	alert($(window).height());
+	cardGame.init();
 
 	// 窗口大小改变时, 重置卡片的宽高
 	$(window).on('resize', function() {
