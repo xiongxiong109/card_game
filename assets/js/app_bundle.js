@@ -80,41 +80,37 @@
 	var getBootstrapInfo = __webpack_require__(8);
 
 	{
-		// 翻牌游戏
+			// 翻牌游戏
 
-		// 先异步获取用户基本信息(可能是通过与app的交互拿到)
-		getBootstrapInfo(function (info) {
+			// 先异步获取用户基本信息(可能是通过与app的交互拿到)
+			getBootstrapInfo(function (info) {
 
-			$(".loading-wrap").css('background-color', 'rgba(33, 33, 33, 0.5)');
+					$(".loading-wrap").css('background-color', 'rgba(33, 33, 33, 0.5)');
 
-			// ajax获取用户签到信息
-			console.log(info);
+					// ajax获取用户签到信息
+					// console.log(info);
 
-			$.ajax({
-				url: '/getSignInfo',
-				dataType: 'json',
-				data: info,
-				success: function success(data) {
-					console.log(data);
-				},
-				error: function error(xhr, status, err) {
-					console.log(err);
-				}
+					// $.ajax({
+					// 	url: '/getSignInfo',
+					// 	dataType: 'json',
+					// 	data: info,
+					// 	success: function(data) {
+					// 		console.log(data);
+					// 	},
+					// 	error: function(xhr, status, err) {
+					// 		console.log(err);
+					// 	}
+					// });
+
+					var cardGame = new _game2.default(gameConfig);
+					cardGame.init();
+
+					// 窗口大小改变时, 重置卡片的宽高
+					$(window).on('resize', function () {
+
+							cardGame.reStyleCardItems(gameConfig.num, gameConfig.houseImg);
+					});
 			});
-
-			// let cardGame = new Game(gameConfig);
-		});
-
-		// console.log(gameConfig);
-
-		// cardGame.init();
-
-		// 窗口大小改变时, 重置卡片的宽高
-		// $(window).on('resize', function() {
-
-		// 	cardGame.reStyleCardItems(gameConfig.num, gameConfig.houseImg);
-
-		// });
 	}
 
 /***/ },
@@ -574,18 +570,18 @@
 /* 2 */
 /***/ function(module, exports) {
 
-	'use strict';
+	"use strict";
 
 	// 游戏配置默认选项
 
 	module.exports = {
 
-		// num: 4, // 切分块数
-		// bgImg: __uri("/assets/img/gift.jpg"), // 大奖图片
-		// houseImg: __uri("/assets/img/house.jpg"), // 楼盘图片
-		// curIdx: 5, // 当前可以翻动的块(连续第几天签到)
-		// canFlip: true, // 是否可以翻动(今天是否已签到)
-		// uId: 123, // 当前抽奖用户的id, 用于与后端交互
+		num: 4, // 切分块数
+		bgImg: __uri("/assets/img/gift.jpg"), // 大奖图片
+		houseImg: __uri("/assets/img/house.jpg"), // 楼盘图片
+		curIdx: 5, // 当前可以翻动的块(连续第几天签到)
+		canFlip: true, // 是否可以翻动(今天是否已签到)
+		uId: 123, // 当前抽奖用户的id, 用于与后端交互
 
 		ajaxConf: { // ajax提交的配置
 
@@ -651,7 +647,7 @@
 /* 7 */
 /***/ function(module, exports) {
 
-	'use strict';
+	"use strict";
 
 	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
@@ -664,90 +660,65 @@
 	// 重新计算尺寸,根据屏幕尺寸，做设计图自适应
 
 	{
-				// 获取dom的class
+		// 获取dom的class
 
-				var Doms = function Doms() {
-							_classCallCheck(this, Doms);
+		var Doms = function Doms() {
+			_classCallCheck(this, Doms);
 
-							this.doms = {
-										$resizeWrap: $(".resize-wrap")
-							};
-				};
+			this.doms = {
+				$cardBoxWrap: $(".card-box-wrap")
+			};
+		};
 
-				// 做尺寸自适应变化的class
+		// 做尺寸自适应变化的class
 
 
-				var Resize = function (_Doms) {
-							_inherits(Resize, _Doms);
+		var Resize = function (_Doms) {
+			_inherits(Resize, _Doms);
 
-							function Resize(w, h) {
-										_classCallCheck(this, Resize);
+			function Resize(w, h) {
+				_classCallCheck(this, Resize);
 
-										var _this2 = _possibleConstructorReturn(this, Object.getPrototypeOf(Resize).call(this));
+				var _this2 = _possibleConstructorReturn(this, Object.getPrototypeOf(Resize).call(this));
 
-										_this2.baseWidth = w;
-										_this2.baseHeight = h;
-										_this2.ratio = w / h;
+				_this2.baseWidth = w;
+				_this2.baseHeight = h;
+				_this2.ratio = w / h;
 
-										return _this2;
-							}
+				return _this2;
+			}
 
-							_createClass(Resize, [{
-										key: 'init',
-										value: function init() {
+			_createClass(Resize, [{
+				key: "init",
+				value: function init() {
 
-													var _this = this;
+					var _this = this;
 
-													_this.resize();
-										}
-							}, {
-										key: 'resize',
-										value: function resize() {
+					_this.resize();
+				}
+			}, {
+				key: "resize",
+				value: function resize() {
 
-													var _this = this;
-													var d = _this.doms;
-													var curW = $(window).width();
-													var curH = $(window).height();
+					var _this = this;
+					var d = _this.doms;
 
-													// console.log(_this.ratio);
+					// 保持盒子的宽高比例
+					d.$cardBoxWrap.height(d.$cardBoxWrap.width() / 0.785);
+				}
+			}]);
 
-													// 默认宽度小于高度, 如果宽度大于高度, 则按高度来缩放
+			return Resize;
+		}(Doms);
 
-													if (curW < curH) {
+		var AppResize = new Resize(750, 1334);
 
-																d.$resizeWrap.width('100%');
-																d.$resizeWrap.height(d.$resizeWrap.width() / _this.ratio);
+		AppResize.init();
 
-																if (d.$resizeWrap.height() > curH) {
+		$(window).on('resize', function () {
 
-																			d.$resizeWrap.height('100%');
-																			d.$resizeWrap.width(d.$resizeWrap.height() * _this.ratio);
-																}
-													} else {
-
-																d.$resizeWrap.height('100%');
-																d.$resizeWrap.width(d.$resizeWrap.height() * _this.ratio);
-
-																if (d.$resizeWrap.width() > curW) {
-
-																			d.$resizeWrap.width('100%');
-																			d.$resizeWrap.height(d.$resizeWrap.width() / _this.ratio);
-																}
-													}
-										}
-							}]);
-
-							return Resize;
-				}(Doms);
-
-				var AppResize = new Resize(750, 1334);
-
-				AppResize.init();
-
-				$(window).on('resize', function () {
-
-							AppResize.resize();
-				});
+			AppResize.resize();
+		});
 	}
 
 /***/ },

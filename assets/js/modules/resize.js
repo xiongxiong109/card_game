@@ -7,7 +7,7 @@
 		constructor() {
 
 			this.doms = {
-				$resizeWrap: $(".resize-wrap")
+				$cardBoxWrap: $(".card-box-wrap")
 			}
 
 		}
@@ -39,39 +39,9 @@
 
 			var _this = this;
 			var d = _this.doms;
-			var curW = $(window).width();
-			var curH = $(window).height();
 
-			// console.log(_this.ratio);
-
-			// 默认宽度小于高度, 如果宽度大于高度, 则按高度来缩放
-			
-			if (curW < curH) {
-
-				d.$resizeWrap.width('100%');
-				d.$resizeWrap.height( d.$resizeWrap.width() / _this.ratio );
-
-				if (d.$resizeWrap.height() > curH) {
-
-					d.$resizeWrap.height('100%');
-					d.$resizeWrap.width( d.$resizeWrap.height() * _this.ratio );
-
-				}
-
-			} else {
-
-				d.$resizeWrap.height('100%');
-				d.$resizeWrap.width( d.$resizeWrap.height() * _this.ratio );
-				
-				if (d.$resizeWrap.width() > curW) {
-
-					d.$resizeWrap.width('100%');
-					d.$resizeWrap.height( d.$resizeWrap.width() / _this.ratio );
-					
-				}
-
-			}
-
+			// 保持盒子的宽高比例
+			d.$cardBoxWrap.height(d.$cardBoxWrap.width() / 0.785);
 
 		}
 

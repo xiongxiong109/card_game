@@ -1,15 +1,20 @@
 // 弹框遮罩
 .mask-wrap {
-	.absolute(0, _, _, 0);
 	.size(100%);
 	.perspective(400px);
+	position: fixed;
+	top: 0;
+	left: 0;
 	background: rgba(21, 17, 30, 0.5);
 	display: none;
 	.mask-card { // 结果卡片
-		.absolute(0,0,0,0);
-		.responseSize(550, 700);
 		.scale(0);
 		.rotateZ(0);
+		.translateY(-50%);
+		position: relative;
+		top: 50%;
+		width: 73%;
+		max-width: 550px;
 		display: none;
 		background: #edc300 url("/assets/img/mask_card_bg.png") center 6.8% no-repeat;
 		background-size: 81%;
@@ -17,10 +22,9 @@
 		border-radius: 5px;
 		opacity: 0;
 		.mask-close {
-			.size(7.2%, 6.4%);
-			.absolute(0, 7.2%, _, _);
-			background: url("/assets/img/mask_card_close.png") center center no-repeat;
-			background-size: 100%;
+			width: 20px;
+			.absolute(0, 20px, _, _);
+			img {width: 100%;}
 		}
 		.mask-rst-wrap {
 			color: #fff;
@@ -36,7 +40,7 @@
 			}
 		}
 		.mask-fn-btn {
-			.size(282 / 550 * 100%, 74 / 700 * 100%);
+			.size(282 / 550 * 100%, 38px);
 			.display(box);
 			.box-pack(center);
 			.box-align(center);
@@ -51,6 +55,7 @@
 			color: #c04d00;
 			font-size: 12px;
 			padding-top: 4.28%;
+			padding-bottom: 4.28%;
 		}
 	}
 	.mask-loading { // ajax loading
@@ -69,6 +74,8 @@
 	}
 	.mask-dialog { // 弹框
 		.size(100%);
+		max-width: 550px;
+		margin: auto;
 		position: relative;
 		display: none;
 		.dialog-box {

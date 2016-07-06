@@ -19,8 +19,9 @@
 	<div class="resize-wrap">
 		<div class="main-wrap">
 			<a href="javascript:void(0);" class="close-btn"></a>
-			<div class="cup-box"></div>
-			<div class="bar-box"></div>
+			<div class="cup-box">
+				<img src="/assets/img/cup.png">
+			</div>
 			<div class="counter-box">剩余<em>?</em>天<a href="javascript:void(0);" class="switch-card">换一张</a></div>
 			<div class="card-box-wrap">
 				<div class="card-box-list"></div>
@@ -31,10 +32,10 @@
 			</div>
 		</div>
 		<!-- 提示遮罩mask -->
-		<div class="mask-wrap">
+		<div class="mask-wrap" ontouchmove="return false;">
 			<!-- 中奖结果卡片 -->
 			<div class="mask-card">
-				<div class="mask-close"></div>
+				<div class="mask-close"><img src="/assets/img/mask_card_close.png"></div>
 				<div class="mask-img-wrap">
 					<img src="assets/img/special.png" id="rstImg">
 					<i class="shadow"></i>
@@ -78,7 +79,7 @@
 	</div>
 	<!-- 主页end -->
 	<!-- loading -->
-	<div class="loading-wrap">
+	<div class="loading-wrap" ontouchmove="return false;">
 		<div class="loading-box">
 			<img src="assets/img/special.png" class="loading-baby">
 			<i class="loading-shadow"></i>

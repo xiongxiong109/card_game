@@ -30,35 +30,30 @@ var getBootstrapInfo = require('./modules/getInfo');
 		$(".loading-wrap").css('background-color', 'rgba(33, 33, 33, 0.5)');
 
 		// ajax获取用户签到信息
-		console.log(info);
+		// console.log(info);
 
-		$.ajax({
-			url: '/getSignInfo',
-			dataType: 'json',
-			data: info,
-			success: function(data) {
-				console.log(data);
-			},
-			error: function(xhr, status, err) {
-				console.log(err);
-			}
+		// $.ajax({
+		// 	url: '/getSignInfo',
+		// 	dataType: 'json',
+		// 	data: info,
+		// 	success: function(data) {
+		// 		console.log(data);
+		// 	},
+		// 	error: function(xhr, status, err) {
+		// 		console.log(err);
+		// 	}
+		// });
+
+		let cardGame = new Game(gameConfig);
+		cardGame.init();
+
+		// 窗口大小改变时, 重置卡片的宽高
+		$(window).on('resize', function() {
+
+			cardGame.reStyleCardItems(gameConfig.num, gameConfig.houseImg);
+
 		});
 
-		// let cardGame = new Game(gameConfig);
-
 	});
-
-	// console.log(gameConfig);
-
-	
-
-	// cardGame.init();
-
-	// 窗口大小改变时, 重置卡片的宽高
-	// $(window).on('resize', function() {
-
-	// 	cardGame.reStyleCardItems(gameConfig.num, gameConfig.houseImg);
-
-	// });
 
 }

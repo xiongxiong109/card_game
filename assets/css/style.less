@@ -1,26 +1,18 @@
 @import url("./est/all.less");
 @import url("./animation.less");
 
-// 自适应等比缩放mixin, 将尺寸全体缩放成百分比
-.responseSize(@width, @height) {
-	@realWidth: 750;
-	@realHeight: 1334;
-
-	.size(@width / @realWidth * 100%, @height / @realHeight * 100%);
-
-}
-
 @use-autoprefixer: false;
 
 .global-reset();
 
-html, body {
+html {
 	height: 100%;
+	.user-select(none);
 }
 body {
 	font-family:'Microsoft Yahei','Simsun','Helvetica';
-	height: 100%;
-	overflow: hidden;
+	min-height: 100%;
+	overflow: auto;
 	position: relative;
 	background-color: #29213a;
 	-webkit-tap-highlight-color:rgba(0,0,0,0);
@@ -28,65 +20,51 @@ body {
 
 @import url("./loading.less");
 @import url("./mask.less");
+
 .resize-wrap {
-	position: absolute;
-	top: 0;
-	bottom: 0;
-	left: 0;
-	right: 0;
-	min-width: 300px;
+	min-width: 320px;
+	max-width: 750px;
 	margin:auto;
 	background: #29213a url("/assets/img/main_bg.jpg") center center no-repeat;
 	background-size: cover;
-	overflow: hidden;
+	position: relative;
+	// overflow: hidden;
 }
 
 .main-wrap {
-	position: absolute;
+
 	width: 100%;
-	height: 100%;
-	top: 0;
-	left: 0;
+	margin: auto;
 
 	a, div {
 		display: block;
-		position: absolute;
+		// position: absolute;
 	}
 	.close-btn {
-		width: 4.8%;
-		padding-top: 4.8%;
+		width: 18px;
+		height: 18px;
 		background: url("/assets/img/close_btn.png")  center center no-repeat;
 		background-size: cover;
-		top: 2.99%;
-		left: 5.3%;
+		position: absolute;
+		top: 20px;
+		left: 20px;
 	}
 	.cup-box {
-		.responseSize(472, 340);
-		left: 0;
-		right: 0;
-		top: 0;
+		width: 79.4%;
 		margin: auto;
-		background: url("/assets/img/cup.png") center center no-repeat;
-		background-size: cover;
-	}
-	.bar-box {
-		.responseSize(596, 99);
-		left: 0;
-		right: 0;
-		top: 10.3%;
-		margin: auto;
-		background: url("/assets/img/bar.png") center center no-repeat;
-		background-size: cover;
+		img {
+			width: 100%;
+		}
 	}
 	.counter-box {
 		.size(91.6%, auto);
 		.clearfix();
-		left: 0;
-		right: 0;
-		top: 18.74%;
+		position: relative;
 		margin: auto;
 		font-size: 12px;
 		line-height: 16px;
+		padding-top: 10px;
+		padding-bottom: 6px;
 		color: #fff;
 		text-align: center;
 		em {
@@ -94,8 +72,9 @@ body {
 			padding: 0 5px;
 		}
 		.switch-card {
+			position: absolute;
 			right: 0;
-			top: 0;
+			top: 10px;
 			color: #5ca17a;
 			text-decoration: none;
 			&:active {
@@ -106,11 +85,9 @@ body {
 }
 
 .card-box-wrap {
-	.responseSize(687, 798);
 	.perspective(400px);
-	top: 22.26%;
-	left: 0;
-	right: 0;
+	width: 91.6%;
+	position: relative;
 	margin: auto;
 	border-radius: 4px;
 	background-color: #fff8e3;
@@ -132,6 +109,7 @@ body {
 	.card-item {
 		background-color: #ccc;
 		background-repeat: no-repeat;
+		position: absolute;
 		// 添加可以翻动的样式
 		&.can-flip {
 			.box-shadow(0px 0px 0px 2px #edce00);
@@ -142,10 +120,8 @@ body {
 
 .footer-tip-box {
 	width: 88%;
-	top: 86.7%;
-	left: 0;
-	right: 0;
 	margin: auto;
+	padding: 15px 0;
 	color: #fff;
 	font-size: 12px;
 	line-height: 24 / 14em;
