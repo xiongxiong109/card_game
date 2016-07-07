@@ -1,5 +1,5 @@
 // 重新计算尺寸,根据屏幕尺寸，做设计图自适应
-
+require('zepto');
 {
 	// 获取dom的class
 	class Doms {

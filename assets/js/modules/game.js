@@ -4,8 +4,6 @@ class Game {
 	constructor(opt) {
 
 		this.opt = opt;
-		// 时间轴动画实例
-		this.timeLine = new TimelineMax();
 
 		this.doms = {
 
@@ -33,52 +31,90 @@ class Game {
 		var _this = this;
 		var d = _this.doms;
 		var o = _this.opt;
-		var t = _this.timeLine;
 
-		d.$loadingWrap.delay(500).fadeOut();
-		// d.$loadingWrap.hide();
+		_this.hideInitLoading(function() {
 
-		_this.initAjaxConfig();
-		// _this.createCardPanel();
+			_this.initAjaxConfig();
 
-		_this.showDialog({
-			txt: '<p>当前城市与上次翻牌城市不一致!</p><p>是否切换回翻牌城市继续翻牌?</p>',
-			confirmOnly: false,
-			confirmTxt: '切换',
-			cancelTxt: '否',
-			confirm: function() {
-				_this.createCardPanel();
-			}
+			// 检测翻牌城市
+			_this.showDialog({
+
+				txt: '<p>当前城市与上次翻牌城市不一致!</p><p>是否切换回翻牌城市继续翻牌?</p>',
+				confirmOnly: false,
+				confirmTxt: '切换',
+				cancelTxt: '否',
+				confirm: function() {
+					_this.createCardPanel();
+				}
+
+			});
+
 		});
 
 	}
 
-	initAjaxConfig() { // ajax配置
+	// 隐藏初始loading框
+	hideInitLoading(fn) {
 
 		var _this = this;
 		var d = _this.doms;
 
-		$.ajaxSetup({
+		d.$loadingWrap.animate({
+			'opacity': 0
+		}, 300, function() {
 
-			url: '/',
-			type: 'get',
-			dataType: 'json',
-			data: {},
-			beforeSend: _this.showLoading,
-			complete: _this.hideLoading
+			d.$loadingWrap.hide();
+			
+			fn && fn();
+
+		});
+	}
+
+	// ajax配置
+	initAjaxConfig() { 
+
+		var _this = this;
+		var d = _this.doms;
+
+		$.extend($.ajaxSettings, {
+
+			timeout: 5000, // ajax超时限制: 5000ms
+			beforeSend: function() {
+				_this.showAjaxLoading();
+			},
+
+			complete: function() {
+				_this.hideAjaxLoading();
+			},
+
+			error: function(xhr, status, err) {
+
+				_this.showDialog({
+
+					txt: `<p>${err}</p>`,
+					confirmOnly: true
+
+				});
+
+			}
 
 		});
 		
 	}
 
-	showLoading() {
+	showAjaxLoading() {
+
+		var d = this.doms;
 
 		d.$maskWrap.show();
 		d.$maskLoading.show();
 
 	}
 
-	hideLoading() {
+	hideAjaxLoading(err) {
+
+		var _this = this;
+		var d = _this.doms;
 
 		d.$maskWrap.hide();
 		d.$maskLoading.hide();
@@ -92,7 +128,6 @@ class Game {
 		var _this = this;
 		var d = _this.doms;
 		var o = _this.opt;
-		var t = _this.timeLine;
 
 		// 大奖图片
 		var bgImg = o.bgImg;
@@ -219,19 +254,18 @@ class Game {
 		var _this = this;
 		var d = _this.doms;
 		var o = _this.opt;
-		var t = _this.timeLine;
 
 		var isRunning = false;
 
 		// 给可以翻牌的卡片绑定点击事件
-		d.$cardList.delegate('.can-flip', 'click', function() {
+		d.$cardList.delegate('.can-flip', 'tap', function() {
 
 			let $self = $(this);
 
 			$self.removeClass('can-flip');
 
 			// 签到ajax配置
-			let _ajax = $.extend({}, o.ajaxConf.sign, {
+			let _ajax = $.extend({}, o.ajaxApi.sign, {
 
 				data: {
 					uId: o.uId
@@ -246,7 +280,13 @@ class Game {
 
 				error: function(xhr, status, err) {
 
-					console.log(err);
+					_this.showDialog({
+
+						txt: `<p>${err}</p>`,
+						confirmOnly: true
+
+					});
+
 					$self.addClass('can-flip');
 
 				}
@@ -254,27 +294,34 @@ class Game {
 			});
 
 			// 对该块进行动画操作
-			_this.AnimateGoRotate($self);
+			// _this.AnimateGoRotate($self);
 
 			// ajax签到抽奖
-			// $.ajax(_ajax);
+			$.ajax(_ajax);
 
 		});
 
 		// 给结果面板的关闭按钮绑定点击事件
-		d.$maskClose.on('click', function() {
+		d.$maskClose.on('tap', function() {
 
-			t.to(d.$maskCard, .5, {
+			d.$maskCard.animate({
 
-				rotationX: 270,
-				scale: 0,
-				opacity: 0,
-				ease: Back.easeIn.config(1.2),
-				onComplete: function() {
+				'opacity': 0,
+				'translateY': '-50%',
+				'rotateX': '180deg',
+				'scale': 0
 
-					d.$maskWrap.fadeOut(200);
+			}, 500, 'cubic-bezier(.73,-0.34,.63,.99)', function() {
 
-				}
+				d.$maskWrap.animate({
+
+					'opacity': 0
+
+				}, 400, function() {
+
+					d.$maskWrap.hide();
+
+				});
 
 			});
 
@@ -292,46 +339,85 @@ class Game {
 		$card.css('zIndex', Math.pow(_this.opt.num, 2));
 
 		// 卡片旋转
-		t.add('rotateAndMove');
-		t.to($card, 1, {
-			rotationY: 720,
-			left: (d.$cardList.width() - $card.width()) / 2 + 'px',
-			top: (d.$cardList.height() - $card.height()) / 2 + 'px',
-			ease: Power1.easeOut
-		});
+		// t.add('rotateAndMove');
+		$card.animate({
 
-		t.add('scaleToNone');
-		t.to($card, .5, {
-			rotationX: 360,
-			scale: 0,
-			onComplete: function() {
-				// ajax获取抽奖结果后, 弹出获奖框
-				_showRst();
-			}
+			'rotateY': '720deg',
+			'rotateX': '0deg',
+			'scale': '1',
+			'left': (d.$cardList.width() - $card.width()) / 2 + 'px',
+			'top': (d.$cardList.height() - $card.height()) / 2 + 'px'
+
+		}, 1000, 'ease-out', function() {
+
+			setTimeout(function() {
+
+				$card.animate({
+
+					'rotateX': '-180deg',
+					'scale': '0.1',
+					'opacity': 0
+
+				}, 500, 'cubic-bezier(.55,-0.41,.79,.77)', function() {
+
+					// 显示抽奖结果
+					_showRst();
+
+				});
+
+			}, 400);
+
 		});
 
 		// 显示抽奖结果
 		function _showRst() {
 
-			d.$maskWrap.fadeIn(100, function() {
+			d.$maskWrap
+			.animate({
 
-				d.$maskCard.show();
+				'opacity': 0
 
-				t.to(d.$maskCard, 0, {
-					scale: 0,
-					opacity: 0,
-					rotationX: 360
-				});
+			}, 0, function() {
 
-				t.to(d.$maskCard, .4, {
-					scale: 1,
-					opacity: 1,
-					rotationX: 0,
-					ease: Back.easeOut.config(0.6)
+				d.$maskWrap
+				.show()
+				.animate({
+
+					'opacity': 1
+
+				}, 300, 'ease', function() {
+
+					_showCard();
+
 				});
 
 			});
 
+		}
+
+		function _showCard() {
+
+			d.$maskCard.animate({
+
+				'opacity': 0,
+				'translateY': '-50%',
+				'rotateX': '180deg',
+				'scale': 0
+
+			}, 0, function() {
+
+				d.$maskCard
+				.show()
+				.animate({
+
+					'opacity': 1,
+					'translateY': '-50%',
+					'rotateX': '0',
+					'scale': 1
+
+				}, 400, 'cubic-bezier(.36,.66,.46,1.22)')
+
+			});
 		}
 	}
 
@@ -340,7 +426,6 @@ class Game {
 
 		var _this = this;
 		var d = _this.doms;
-		var t = _this.timeLine;
 
 		var defaults = {
 			txt: '<p>弹框提示</p>', // 弹框提示文本(html)
@@ -373,10 +458,14 @@ class Game {
 		d.$dialogBtnWrap.html(btnStr);
 
 		// 显示弹框
-		_animateShowDialog();
+		setTimeout(function() {
+
+			_animateShowDialog();
+
+		}, 400);
 
 		// 关闭弹框
-		d.$dialogBtnWrap.delegate('.btn-confirm', 'click', function() {
+		d.$dialogBtnWrap.delegate('.btn-confirm', 'tap', function() {
 
 			_animateHideDialog(function() {
 
@@ -386,7 +475,7 @@ class Game {
 
 		});
 
-		d.$dialogBtnWrap.delegate('.btn-cancel', 'click', function() {
+		d.$dialogBtnWrap.delegate('.btn-cancel', 'tap', function() {
 
 			_animateHideDialog(function() {
 
@@ -399,44 +488,81 @@ class Game {
 		// 显示弹框动画
 		function _animateShowDialog() {
 
-			d.$maskWrap.show();
-			d.$maskDialogWrap.fadeIn(function() {
+			d.$maskWrap.css('opacity', 0)
+			.show()
+			.animate({
+				'opacity': 1
+			}, 300);
 
-				d.$dialogBox.show();
+			d.$maskDialogWrap.animate({
+				'opacity': 0
+			}, 0, function() {
 
-				t.to(d.$dialogBox, 0, {
-					rotationY: 180,
-					opacity: 0
-				})
-				.to(d.$dialogBox, 0, {
-					rotationY: 180,
-					opacity:0
-				}, .4)
-				.to(d.$dialogBox, .5, {
-					rotationY: 0,
-					opacity: 1,
-					ease: Back.easeOut.config(0.8)
+				d.$maskDialogWrap
+				.show()
+				.animate({
+					'opacity': 1,
+				}, 400, function() {
+
+					_animateShowDialogBox();
+
+				});
+			});
+
+			function _animateShowDialogBox() {
+
+				d.$dialogBox
+				.show()
+				.animate({
+
+					'translateX': '-50%',
+					'translateY': '-50%',
+					'scale': '0',
+					'opacity': 0
+
+				}, 0, function() {
+
+					d.$dialogBox
+					.animate({
+
+						'translateX': '-50%',
+						'translateY': '-50%',
+						'scale': '1',
+						'opacity': 1
+
+					}, 400, 'cubic-bezier(.17,.67,.48,1.31)');
+
 				});
 
-			});
+			}
 
 		}
 
 		// 关闭弹框动画
 		function _animateHideDialog(cb) {
 
-			t.to(d.$dialogBox, .5, {
-				rotationY: 180,
-				opacity:0,
-				ease: Back.easeIn.config(0.8),
-				onComplete: function() {
+			d.$dialogBox.animate({
 
-					d.$dialogBox.hide();
-					d.$maskDialogWrap.hide();
+				'translateX': '-50%',
+				'translateY': '-50%',
+				'scale': '0',
+				'opacity':0,
+
+			}, 400, 'cubic-bezier(.67,-0.38,.97,.99)', function() {
+
+				d.$dialogBox.hide();
+				d.$maskDialogWrap.hide();
+
+				d.$maskWrap.animate({
+					'opacity': 0
+				}, 400, function() {
+
 					d.$maskWrap.hide();
-
 					cb && cb();
-				}
+
+				});
+
+
 			});
 
 		}

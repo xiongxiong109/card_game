@@ -9,7 +9,7 @@ module.exports = {
 	canFlip: true, // 是否可以翻动(今天是否已签到)
 	uId: 123, // 当前抽奖用户的id, 用于与后端交互
 
-	ajaxConf: { // ajax提交的配置
+	ajaxApi: { // ajax提交的配置
 
 		sign: { // 签到提交
 			url: '/getSign',

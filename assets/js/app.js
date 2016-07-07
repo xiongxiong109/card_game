@@ -1,8 +1,5 @@
-// jquery, 并把$变量挂载到全局
-require('expose?$!jquery');
-
-// tweenMax
-require('tweenMax');
+// zepto
+require('zepto');
 
 // resize模块, 动态计算页面尺寸
 require('./modules/resize');
