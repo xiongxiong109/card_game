@@ -106,8 +106,8 @@ class Game {
 
 		var d = this.doms;
 
-		d.$maskWrap.show();
-		d.$maskLoading.show();
+		d.$maskWrap.css('opacity', 1).show();
+		d.$maskLoading.css('opacity', 1).show();
 
 	}
 
@@ -116,8 +116,8 @@ class Game {
 		var _this = this;
 		var d = _this.doms;
 
-		d.$maskWrap.hide();
-		d.$maskLoading.hide();
+		d.$maskWrap.hide().css('opacity', 0);
+		d.$maskLoading.hide().css('opacity', 0);
 
 	}
 
@@ -238,16 +238,29 @@ class Game {
 
 		} else { // 表示翻牌结束
 			//...
+			$cardItems.remove();
 		}
 
-		// 显示剩余天数
-		d.$counterNum.text($cardItems.length - o.curIdx);
+		// 显示剩余天数, 最小不能小于0了
+		_this.countDisDay();
 
 		// 执行回调函数
 		cb && cb();
 
 	}
 	
+	// 计算剩余天数	
+	countDisDay() {
+
+		var _this = this;
+		var o = _this.opt;
+		var d = _this.doms;
+		var $cardItems = $(".card-item");
+
+		var disDay = Math.max($cardItems.length - o.curIdx, 0);
+		d.$counterNum.text(disDay);
+
+	}	
 	// 事件绑定, 给签到绑定点击事件
 	bindEvents() {
 
@@ -275,7 +288,12 @@ class Game {
 
 					// 对该块进行动画操作
 					_this.AnimateGoRotate($self);
-
+					// 计算剩余天数
+					o.curIdx++;
+					_this.countDisDay();
+					// 渲染抽奖结果
+					// ...
+					
 				},
 
 				error: function(xhr, status, err) {
@@ -283,11 +301,13 @@ class Game {
 					_this.showDialog({
 
 						txt: `<p>${err}</p>`,
-						confirmOnly: true
+						confirmOnly: true,
+						confirm: function() {
 
+							$self.addClass('can-flip');
+
+						}
 					});
-
-					$self.addClass('can-flip');
 
 				}
 
@@ -295,6 +315,10 @@ class Game {
 
 			// 对该块进行动画操作
 			// _this.AnimateGoRotate($self);
+
+			// 计算剩余天数
+			// o.curIdx++;
+			// _this.countDisDay();
 
 			// ajax签到抽奖
 			$.ajax(_ajax);

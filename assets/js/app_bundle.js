@@ -234,8 +234,8 @@
 
 							var d = this.doms;
 
-							d.$maskWrap.show();
-							d.$maskLoading.show();
+							d.$maskWrap.css('opacity', 1).show();
+							d.$maskLoading.css('opacity', 1).show();
 					}
 			}, {
 					key: "hideAjaxLoading",
@@ -244,8 +244,8 @@
 							var _this = this;
 							var d = _this.doms;
 
-							d.$maskWrap.hide();
-							d.$maskLoading.hide();
+							d.$maskWrap.hide().css('opacity', 0);
+							d.$maskLoading.hide().css('opacity', 0);
 					}
 
 					// 创建卡牌面板, 通过ajax获取响应的展示图片
@@ -367,17 +367,33 @@
 													$(ele).hide();
 											}
 									});
-							} else {} // 表示翻牌结束
-							//...
+							} else {
+									// 表示翻牌结束
+									//...
+									$cardItems.remove();
+							}
 
-
-							// 显示剩余天数
-							d.$counterNum.text($cardItems.length - o.curIdx);
+							// 显示剩余天数, 最小不能小于0了
+							_this.countDisDay();
 
 							// 执行回调函数
 							cb && cb();
 					}
 
+					// 计算剩余天数	
+
+			}, {
+					key: "countDisDay",
+					value: function countDisDay() {
+
+							var _this = this;
+							var o = _this.opt;
+							var d = _this.doms;
+							var $cardItems = $(".card-item");
+
+							var disDay = Math.max($cardItems.length - o.curIdx, 0);
+							d.$counterNum.text(disDay);
+					}
 					// 事件绑定, 给签到绑定点击事件
 
 			}, {
@@ -408,6 +424,11 @@
 
 													// 对该块进行动画操作
 													_this.AnimateGoRotate($self);
+													// 计算剩余天数
+													o.curIdx++;
+													_this.countDisDay();
+													// 渲染抽奖结果
+													// ...
 											},
 
 											error: function error(xhr, status, err) {
@@ -415,17 +436,22 @@
 													_this.showDialog({
 
 															txt: "<p>" + err + "</p>",
-															confirmOnly: true
+															confirmOnly: true,
+															confirm: function confirm() {
 
+																	$self.addClass('can-flip');
+															}
 													});
-
-													$self.addClass('can-flip');
 											}
 
 									});
 
 									// 对该块进行动画操作
 									// _this.AnimateGoRotate($self);
+
+									// 计算剩余天数
+									// o.curIdx++;
+									// _this.countDisDay();
 
 									// ajax签到抽奖
 									$.ajax(_ajax);
@@ -678,10 +704,10 @@
 
 	module.exports = {
 
-		num: 4, // 切分块数
+		num: 3, // 切分块数
 		bgImg: __uri("/assets/img/gift.jpg"), // 大奖图片
 		houseImg: __uri("/assets/img/house.jpg"), // 楼盘图片
-		curIdx: 5, // 当前可以翻动的块(连续第几天签到)
+		curIdx: 3, // 当前可以翻动的块(连续第几天签到)
 		canFlip: true, // 是否可以翻动(今天是否已签到)
 		uId: 123, // 当前抽奖用户的id, 用于与后端交互
 
