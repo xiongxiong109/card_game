@@ -1,0 +1,40 @@
+// icon_spirte
+
+.suprise-icon { // 雪碧图
+	display: block;
+	margin: auto;
+	background-repeat: no-repeat;
+	background-size: 149px auto;
+	background-image: url("../img/surprise.png");
+	.animation(loading-shake 1s linear infinite);
+
+	&.icon-special { // 特别奖
+		.size(117px, 116px);
+		background-position: -8px -130px;
+	}
+	&.icon-hongbao { // 路费红包
+		.size(140px, 130px);
+		background-position: 0 0;
+	}
+	&.icon-empty { // 未中奖
+		.size(102px, 117px);
+		background-position: -16px -247px;
+	}
+	&.icon-sale { // 礼券
+		.size(133px, 130px);
+		background-position: -8px -364px;
+	}
+
+}
+
+i.shadow {
+	.inline-block();
+	.size(95px, 10px);
+	.border-top-left-radius(80px 15px);
+	.border-top-right-radius(80px 15px);
+	.border-bottom-right-radius(80px 15px);
+	.border-bottom-left-radius(80px 15px);
+	.animation(loading-shadow 1s linear infinite);
+	margin-top: 5%;
+	background-color: #dcb20d;
+}

@@ -161,7 +161,6 @@
 							_this.hideInitLoading(function () {
 
 									_this.initAjaxConfig();
-
 									// 检测翻牌城市
 									_this.showDialog({
 
@@ -170,7 +169,11 @@
 											confirmTxt: '切换',
 											cancelTxt: '否',
 											confirm: function confirm() {
+													// 关闭翻牌webview, 回首页
 													_this.createCardPanel();
+											},
+											cancel: function cancel() {// 不做任何处理
+
 											}
 
 									});
@@ -286,14 +289,12 @@
 
 							var _this = this;
 							var d = _this.doms;
+							var o = _this.opt;
 							var pow = Math.pow;
-							var floor = Math.floor;
-							var random = Math.random;
-							var round = Math.round;
 
 							var totalNum = pow(num, 2);
-
 							var domStr = '';
+							var $cardItems = void 0;
 
 							for (var i = 0; i < num; i++) {
 									for (var j = 0; j < num; j++) {
@@ -305,6 +306,14 @@
 
 							// 调整card-item的宽高、样式
 							_this.reStyleCardItems(num, imgUrl, cb);
+
+							$cardItems = $(".card-item"); // 更新最新dom
+
+							// 如果今天可以翻牌, 则给当前可以翻动的块加上高亮样式(只在创建的时候加上can-flip, 调整宽高样式的时候不能做添加高亮处理)
+							if (o.canFlip == true) {
+
+									$cardItems.eq(o.curIdx).addClass('can-flip');
+							}
 					}
 
 					/** 重置卡片样式函数
@@ -348,12 +357,6 @@
 													'top': itemHeight * y + OFFSET * y
 											});
 									}
-							}
-
-							// 如果今天可以翻牌, 则给当前可以翻动的块加上高亮样式
-							if (o.canFlip == true) {
-
-									$cardItems.eq(o.curIdx).addClass('can-flip');
 							}
 
 							// 当前可翻牌，且不是最后一张牌

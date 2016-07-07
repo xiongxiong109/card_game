@@ -7,6 +7,7 @@
 	left: 0;
 	background: rgba(21, 17, 30, 0.5);
 	display: none;
+
 	.mask-card { // 结果卡片
 		.scale(0);
 		.rotateZ(0);
@@ -67,10 +68,10 @@
 			padding-top: 0;
 			margin: auto;
 			position: relative;
-			img {
-				.absolute(0, 0, 0, 0);
-				width: 20%;
-			}
+			// img {
+			// 	.absolute(0, 0, 0, 0);
+			// 	width: 20%;
+			// }
 		}
 	}
 	.mask-dialog { // 弹框
@@ -128,22 +129,16 @@
 	.mask-img-wrap {
 		text-align: center;
 		padding-top: 6.14%;
-		img {
-			width: 37%;
+		position: relative;
+		.suprise-icon{
 			margin: auto;
 			display: block;
 			.animation(loading-shake 1s linear infinite);
 		}
-		i.shadow {
-			.inline-block();
-			.size(30%, 10px);
-			.border-top-left-radius(80px 15px);
-			.border-top-right-radius(80px 15px);
-			.border-bottom-right-radius(80px 15px);
-			.border-bottom-left-radius(80px 15px);
-			.animation(loading-shadow 1s linear infinite);
-			margin-top: 5%;
-			background-color: #dcb20d;
+		.loading-center-icon {
+			.absolute(0, 0, 0, 0);
+			margin: auto;
 		}
+
 	}
 }

@@ -35,7 +35,6 @@ class Game {
 		_this.hideInitLoading(function() {
 
 			_this.initAjaxConfig();
-
 			// 检测翻牌城市
 			_this.showDialog({
 
@@ -43,8 +42,11 @@ class Game {
 				confirmOnly: false,
 				confirmTxt: '切换',
 				cancelTxt: '否',
-				confirm: function() {
+				confirm: function() { // 关闭翻牌webview, 回首页
 					_this.createCardPanel();
+				},
+				cancel: function() { // 不做任何处理
+
 				}
 
 			});
@@ -157,10 +159,11 @@ class Game {
 
 		let _this = this;
 		let d = _this.doms;
-		let {pow, floor, random, round} = Math;
+		let o = _this.opt;
+		let {pow} = Math;
 		let totalNum = pow(num, 2);
-
 		let domStr = '';
+		let $cardItems;
 
 		for (let i = 0; i < num; i++) {
 			for (let j = 0; j < num; j++) {
@@ -172,6 +175,15 @@ class Game {
 
 		// 调整card-item的宽高、样式
 		_this.reStyleCardItems(num, imgUrl, cb);
+
+		$cardItems = $(".card-item"); // 更新最新dom
+
+		// 如果今天可以翻牌, 则给当前可以翻动的块加上高亮样式(只在创建的时候加上can-flip, 调整宽高样式的时候不能做添加高亮处理)
+		if (o.canFlip == true) {
+
+			$cardItems.eq(o.curIdx).addClass('can-flip');
+
+		}
 
 	}
 
@@ -213,13 +225,6 @@ class Game {
 					'top': itemHeight * y + OFFSET * y
 				});
 			}
-		}
-
-		// 如果今天可以翻牌, 则给当前可以翻动的块加上高亮样式
-		if (o.canFlip == true) {
-
-			$cardItems.eq(o.curIdx).addClass('can-flip');
-
 		}
 
 		// 当前可翻牌，且不是最后一张牌
@@ -293,7 +298,7 @@ class Game {
 					_this.countDisDay();
 					// 渲染抽奖结果
 					// ...
-					
+
 				},
 
 				error: function(xhr, status, err) {
