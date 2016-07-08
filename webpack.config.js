@@ -23,7 +23,8 @@ module.exports = {
 			'jquery': __dirname + '/bower_lib/jquery/dist/jquery.min.js',
 			'zepto': __dirname + '/bower_lib/zepto/zepto.min.js',
 			'underscore': __dirname + '/bower_lib/underscore/underscore-min.js',
-			'tweenMax': __dirname + '/assets/js/tweenMax/TweenMax.min.js'
+			'tweenMax': __dirname + '/assets/js/tweenMax/TweenMax.min.js',
+			'fphJsBridge': __dirname + '/assets/js/modules/fphJsBridge.js'
 		}
 	}
 }

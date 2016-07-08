@@ -10,6 +10,8 @@ import Game from './modules/game';
 // 游戏配置
 import Config from './modules/config';
 
+// 引入app交互方法
+const Act = require('./modules/fphAppAction');
 
 /**引入游戏开始前用户信息分析模块
  * @ 模块进行异步操作进行各种复杂的前期处理
@@ -17,39 +19,107 @@ import Config from './modules/config';
 **/
 
 var gameConfig = Config;
-var getBootstrapInfo = require('./modules/getInfo');
 
 { // 翻牌游戏
 
-	// 先异步获取用户基本信息(可能是通过与app的交互拿到)
-	getBootstrapInfo(function(info) {
+	// 先通过app异步获取用户基本信息
+	Act.getInfo(function(rst) {
+
+		// 将用户信息扩展到gameConfig.userInfo上去
+		$.extend(gameConfig.userInfo, rst);
 
 		$(".loading-wrap").css('background-color', 'rgba(33, 33, 33, 0.5)');
 
-		// ajax获取用户签到信息
-		// console.log(info);
+		// 初始化ajax加载失败提示, 做好容错处理
+		let $failWrap = $(".fail-wrap");
 
-		// $.ajax({
-		// 	url: '/getSignInfo',
-		// 	dataType: 'json',
-		// 	data: info,
-		// 	success: function(data) {
-		// 		console.log(data);
-		// 	},
-		// 	error: function(xhr, status, err) {
-		// 		console.log(err);
-		// 	}
-		// });
+		// 点击按钮重新请求
+		$failWrap.delegate('.reload-btn', 'tap', function(e) {
 
-		let cardGame = new Game(gameConfig);
-		cardGame.init();
+			e.preventDefault();
 
-		// 窗口大小改变时, 重置卡片的宽高
-		$(window).on('resize', function() {
+			_hideError(function() {
+				
+				setTimeout(function() {
 
-			cardGame.reStyleCardItems(gameConfig.num, gameConfig.houseImg);
+					$.ajax(_ajax);
+
+				}, 300);
+
+			});
+			
+		});
+
+		// 根据用户信息获取用户活动信息
+		var _ajax = $.extend({}, gameConfig.ajaxApi.info, {
+
+			data: rst,
+			success: function(data) { // 拿到翻牌信息
+				
+				// 将翻牌信息扩展到gameConfig的flipInfo信息上
+				if (!$.isEmptyObject(data.returnObject)) {
+
+					$.extend(gameConfig.flipInfo, data.returnObject);
+
+					// 确保信息无误后, 启动游戏
+					let cardGame = new Game(gameConfig);
+
+					cardGame.init();
+
+					// 添加窗口尺寸变化监听
+					$(window).on('resize', function() {
+
+						cardGame.reStyleCardItems(gameConfig.num, gameConfig.houseImg);
+
+					});
+
+				} else {
+
+					_showError();
+
+				}
+
+			},
+			error: function(xhr, status, err) {
+				_showError();
+			}
 
 		});
+
+		$.ajax(_ajax);
+
+		function _showError() {
+
+			$failWrap.animate({
+
+				'left': '100%',
+
+			}, 0, function() {
+
+				$failWrap.show()
+				.animate({
+					'left': 0
+				}, 300, 'ease');
+
+			});
+
+		}
+
+
+		function _hideError(fn) {
+
+			$failWrap.animate({
+
+				'left': '100%'
+
+			}, 300, 'ease', function() {
+
+				$failWrap.hide();
+				fn && fn();
+
+			});
+
+		}
 
 	});
 

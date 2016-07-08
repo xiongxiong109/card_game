@@ -1,9 +1,13 @@
+
 // 翻牌游戏class
 class Game {
 
 	constructor(opt) {
 
 		this.opt = opt;
+
+		// 引入app交互方法
+		this.Act = require('./fphAppAction');
 
 		this.doms = {
 
@@ -35,26 +39,95 @@ class Game {
 		_this.hideInitLoading(function() {
 
 			_this.initAjaxConfig();
-			// 检测翻牌城市
-			_this.showDialog({
 
-				txt: '<p>当前城市与上次翻牌城市不一致!</p><p>是否切换回翻牌城市继续翻牌?</p>',
-				confirmOnly: false,
-				confirmTxt: '切换',
-				cancelTxt: '否',
-				confirm: function() { // 关闭翻牌webview, 回首页
-					_this.createCardPanel();
-				},
-				cancel: function() { // 不做任何处理
+			let {flipInfo, userInfo} = o;
+
+			// 状态机
+			if (flipInfo.has_flip == 1) { // 1.有有效活动
+
+				if (flipInfo.is_invalid == 1) { // 已经违规
+
+					if (flipInfo.is_change == 1) { // 是否可以换一张
+						
+						_this.showDialog({
+							txt: '<p>很遗憾，您已无法完成翻牌活动，换一张试试~</p>',
+							confirmTxt: '好的',
+							cancelTxt: '算了',
+							cancel: function() {
+								// 退出翻牌
+								_this.exitFlip();
+							}
+						});
+
+					} else {
+						console.log('已经违规, 并且不可换了');
+					}
+
+				} else { // 没有违规, 可继续翻牌, 走正常的翻牌初始化
+
+					console.log('start');
 
 				}
 
-			});
+			} else { // 2.无有效活动, 提示msg并关闭
+
+				_this.showDialog({
+					txt: `<p>${flipInfo.msg}</p>`,
+					confirmOnly: true,
+					confirm: function() {
+						// // 退出翻牌
+						_this.exitFlip();
+					} 
+				});
+
+			}
+
+			// 检测翻牌城市
+			// _this.showDialog({
+
+			// 	txt: '<p>当前城市与上次翻牌城市不一致!</p><p>是否切换回翻牌城市继续翻牌?</p>',
+			// 	confirmOnly: false,
+			// 	confirmTxt: '切换',
+			// 	cancelTxt: '否',
+			// 	confirm: function() { // 关闭翻牌webview, 回首页
+			// 		_this.createCardPanel();
+			// 	},
+			// 	cancel: function() { // 不做任何处理
+
+			// 	}
+
+			// });
 
 		});
 
 	}
 
+	// 退出翻牌, 先调用api的退出接口, 调用成功后, 调用app的退出方法
+	exitFlip() {
+
+		var _this = this;
+		var o = _this.opt;
+
+		var _ajax = $.extend({}, o.ajaxApi.exit, {
+
+			data: {
+				t: o.userInfo.t,
+				_t: o.userInfo._t,
+				flip_id: o.flipInfo.flip_id
+			},
+
+			success: function(data) {
+				console.log(data);
+
+				_this.Act.closePage();
+				
+			}
+
+		});
+
+		$.ajax(_ajax);
+
+	}
 	// 隐藏初始loading框
 	hideInitLoading(fn) {
 

@@ -96,6 +96,7 @@
 				font-size: 14px;
 				color: #262626;
 				line-height: 2em;
+				padding: 0 20px;
 			}
 		}
 		.dialog-btn-wrap {
@@ -140,5 +141,39 @@
 			margin: auto;
 		}
 
+	}
+}
+
+// ajax 初始化加载失败
+.fail-wrap {
+	.size(100%);
+	.display(box);
+	.box-pack(center);
+	.box-align(center);
+	background: rgba(237, 195, 0, 1);
+	position: fixed;
+	z-index: 9;
+	top: 0;
+	left: 0;
+	display: none;
+	.fail-item {
+		.size(100%);
+		.absolute(0, _, _, 0);
+		.display(box);
+		.box-orient(vertical);
+		.box-pack(center);
+		.box-align(center);
+	}
+	.suprise-icon {
+		.animation(none);
+	}
+	p {
+		padding: 10px;
+	}
+	.reload-btn {
+		color: #000;
+		&:active {
+			color: lighten(#000, 30%);
+		}
 	}
 }

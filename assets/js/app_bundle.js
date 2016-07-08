@@ -68,51 +68,113 @@
 	// 游戏配置
 
 
+	// 引入app交互方法
+	var Act = __webpack_require__(5);
+
 	/**引入游戏开始前用户信息分析模块
 	 * @ 模块进行异步操作进行各种复杂的前期处理
 	 * @ 处理结束后, 返回所需的json, 并重写到gameConfig中, 然后根据gameConfig启动翻牌游戏
 	**/
 
 	var gameConfig = _config2.default;
-	var getBootstrapInfo = __webpack_require__(5);
 
 	{
 			// 翻牌游戏
 
-			// 先异步获取用户基本信息(可能是通过与app的交互拿到)
-			getBootstrapInfo(function (info) {
+			// 先通过app异步获取用户基本信息
+			Act.getInfo(function (rst) {
+
+					// 将用户信息扩展到gameConfig.userInfo上去
+					$.extend(gameConfig.userInfo, rst);
 
 					$(".loading-wrap").css('background-color', 'rgba(33, 33, 33, 0.5)');
 
-					// ajax获取用户签到信息
-					// console.log(info);
+					// 初始化ajax加载失败提示, 做好容错处理
+					var $failWrap = $(".fail-wrap");
 
-					// $.ajax({
-					// 	url: '/getSignInfo',
-					// 	dataType: 'json',
-					// 	data: info,
-					// 	success: function(data) {
-					// 		console.log(data);
-					// 	},
-					// 	error: function(xhr, status, err) {
-					// 		console.log(err);
-					// 	}
-					// });
+					// 点击按钮重新请求
+					$failWrap.delegate('.reload-btn', 'tap', function (e) {
 
-					var cardGame = new _game2.default(gameConfig);
-					cardGame.init();
+							e.preventDefault();
 
-					// 窗口大小改变时, 重置卡片的宽高
-					$(window).on('resize', function () {
+							_hideError(function () {
 
-							cardGame.reStyleCardItems(gameConfig.num, gameConfig.houseImg);
+									setTimeout(function () {
+
+											$.ajax(_ajax);
+									}, 300);
+							});
 					});
+
+					// 根据用户信息获取用户活动信息
+					var _ajax = $.extend({}, gameConfig.ajaxApi.info, {
+
+							data: rst,
+							success: function success(data) {
+									// 拿到翻牌信息
+
+									// 将翻牌信息扩展到gameConfig的flipInfo信息上
+									if (!$.isEmptyObject(data.returnObject)) {
+											(function () {
+
+													$.extend(gameConfig.flipInfo, data.returnObject);
+
+													// 确保信息无误后, 启动游戏
+													var cardGame = new _game2.default(gameConfig);
+
+													cardGame.init();
+
+													// 添加窗口尺寸变化监听
+													$(window).on('resize', function () {
+
+															cardGame.reStyleCardItems(gameConfig.num, gameConfig.houseImg);
+													});
+											})();
+									} else {
+
+											_showError();
+									}
+							},
+							error: function error(xhr, status, err) {
+									_showError();
+							}
+
+					});
+
+					$.ajax(_ajax);
+
+					function _showError() {
+
+							$failWrap.animate({
+
+									'left': '100%'
+
+							}, 0, function () {
+
+									$failWrap.show().animate({
+											'left': 0
+									}, 300, 'ease');
+							});
+					}
+
+					function _hideError(fn) {
+
+							$failWrap.animate({
+
+									'left': '100%'
+
+							}, 300, 'ease', function () {
+
+									$failWrap.hide();
+									fn && fn();
+							});
+					}
 			});
 	}
 
 /***/ },
 /* 1 */
-/***/ function(module, exports) {
+/***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
 
@@ -127,6 +189,9 @@
 					_classCallCheck(this, Game);
 
 					this.opt = opt;
+
+					// 引入app交互方法
+					this.Act = __webpack_require__(5);
 
 					this.doms = {
 
@@ -161,25 +226,96 @@
 							_this.hideInitLoading(function () {
 
 									_this.initAjaxConfig();
-									// 检测翻牌城市
-									_this.showDialog({
 
-											txt: '<p>当前城市与上次翻牌城市不一致!</p><p>是否切换回翻牌城市继续翻牌?</p>',
-											confirmOnly: false,
-											confirmTxt: '切换',
-											cancelTxt: '否',
-											confirm: function confirm() {
-													// 关闭翻牌webview, 回首页
-													_this.createCardPanel();
-											},
-											cancel: function cancel() {// 不做任何处理
+									var flipInfo = o.flipInfo;
+									var userInfo = o.userInfo;
 
+									// 状态机
+
+									if (flipInfo.has_flip == 1) {
+											// 1.有有效活动
+
+											if (flipInfo.is_invalid == 1) {
+													// 已经违规
+
+													if (flipInfo.is_change == 1) {
+															// 是否可以换一张
+
+															_this.showDialog({
+																	txt: '<p>很遗憾，您已无法完成翻牌活动，换一张试试~</p>',
+																	confirmTxt: '好的',
+																	cancelTxt: '算了',
+																	cancel: function cancel() {
+																			// 退出翻牌
+																			_this.exitFlip();
+																	}
+															});
+													} else {
+															console.log('已经违规, 并且不可换了');
+													}
+											} else {
+													// 没有违规, 可继续翻牌, 走正常的翻牌初始化
+
+													console.log('start');
 											}
+									} else {
+											// 2.无有效活动, 提示msg并关闭
 
-									});
+											_this.showDialog({
+													txt: "<p>" + flipInfo.msg + "</p>",
+													confirmOnly: true,
+													confirm: function confirm() {
+															// // 退出翻牌
+															_this.exitFlip();
+													}
+											});
+									}
+
+									// 检测翻牌城市
+									// _this.showDialog({
+
+									// 	txt: '<p>当前城市与上次翻牌城市不一致!</p><p>是否切换回翻牌城市继续翻牌?</p>',
+									// 	confirmOnly: false,
+									// 	confirmTxt: '切换',
+									// 	cancelTxt: '否',
+									// 	confirm: function() { // 关闭翻牌webview, 回首页
+									// 		_this.createCardPanel();
+									// 	},
+									// 	cancel: function() { // 不做任何处理
+
+									// 	}
+
+									// });
 							});
 					}
 
+					// 退出翻牌, 先调用api的退出接口, 调用成功后, 调用app的退出方法
+
+			}, {
+					key: "exitFlip",
+					value: function exitFlip() {
+
+							var _this = this;
+							var o = _this.opt;
+
+							var _ajax = $.extend({}, o.ajaxApi.exit, {
+
+									data: {
+											t: o.userInfo.t,
+											_t: o.userInfo._t,
+											flip_id: o.flipInfo.flip_id
+									},
+
+									success: function success(data) {
+											console.log(data);
+
+											_this.Act.closePage();
+									}
+
+							});
+
+							$.ajax(_ajax);
+					}
 					// 隐藏初始loading框
 
 			}, {
@@ -707,23 +843,49 @@
 
 	module.exports = {
 
-		num: 3, // 切分块数
-		bgImg: __uri("/assets/img/gift.jpg"), // 大奖图片
-		houseImg: __uri("/assets/img/house.jpg"), // 楼盘图片
-		curIdx: 3, // 当前可以翻动的块(连续第几天签到)
-		canFlip: true, // 是否可以翻动(今天是否已签到)
-		uId: 123, // 当前抽奖用户的id, 用于与后端交互
+		// num: 3, // 切分块数
+		// bgImg: __uri("/assets/img/gift.jpg"), // 大奖图片
+		// houseImg: __uri("/assets/img/house.jpg"), // 楼盘图片
+		// curIdx: 3, // 当前可以翻动的块(连续第几天签到)
+		// canFlip: true, // 是否可以翻动(今天是否已签到)
+		// uId: 123, // 当前抽奖用户的id, 用于与后端交互
 
+		userInfo: { // 用户身份信息
+			_t: "",
+			city: "",
+			current_city: "",
+			lt: "",
+			t: ""
+		},
+		flipInfo: { // 用户翻牌信息
+			flip_id: "",
+			flip_img: "",
+			flip_model: "",
+			flip_rule: "",
+			gift_img: "",
+			has_flip: "",
+			is_change: "",
+			msg: "",
+			offer: "",
+			pid: "",
+			property_name: "",
+			surplus_times: ""
+		},
 		ajaxApi: { // ajax提交的配置
 
-			sign: { // 签到提交
-				url: '/getSign',
+			clickFlip: { // 点击翻牌
+				url: '/activity/clickflip',
 				type: 'post'
 			},
 
 			info: { // 获取用户当前签到信息
-				url: '/getInfo',
-				type: 'get'
+				url: '/activity/flip',
+				type: 'post'
+			},
+
+			exit: { // 退出接口
+				url: '/activity/exitflip',
+				type: 'post'
 			}
 
 		}
@@ -1108,18 +1270,43 @@
 
 /***/ },
 /* 5 */
-/***/ function(module, exports) {
+/***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
-	// 获取启动信息, 包括当前城市信息、用户uId
+	// 与app的交互方法
 
+	__webpack_require__(6);
+
+	// 配置所需调用app接口的jsBridge
+
+	fph.config({
+		debug: true,
+		apiList: ['getUserInfo', // 获取用户信息
+		'closeViewPage', // 关闭当前webview
+		'goToProperty', // 跳转楼盘详情
+		'goToLogin']
+	});
+
+	// 获取用户信息
 	function getInfo(cb) {
 
 		var rst = {
-			uId: 1253,
-			city_name: '上海市'
+			t: '1f3s2df13sd', // 密钥
+			_t: 'fasd132asd', // 用户登录密钥
+			city: '上海市', // 选择城市
+			current_city: '北京市', // 当前城市
+			lt: '121.424712,31.176326' // 定位经纬度
 		};
+
+		// 调用app方法, 获取用户信息
+		// fph.getUserInfo({
+
+		// 	success: function(data) {
+		// 		cb && cb(data);
+		// 	}
+
+		// });
 
 		setTimeout(function () {
 
@@ -1127,7 +1314,156 @@
 		}, 1000);
 	}
 
-	module.exports = getInfo;
+	// 关闭当前窗口(点击关闭按钮时, 先走php接口释放资源, 然后调app方法关闭当前窗口)
+
+	function closePage(cb) {
+
+		fph.closeViewPage();
+	}
+
+	// 跳转楼盘详情
+
+	function goToProperty(pid) {
+
+		fph.goToProperty({ pid: pid });
+	}
+
+	// 跳转登录面板
+
+	function goToLogin() {
+
+		fph.goToLogin();
+	}
+
+	module.exports = { getInfo: getInfo, closePage: closePage, goToProperty: goToProperty, goToLogin: goToLogin };
+
+/***/ },
+/* 6 */
+/***/ function(module, exports) {
+
+	'use strict';
+
+	var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
+
+	/** fph C端 app jsbridge beta
+	*   @author: xiongxiong109
+	**/
+	;(function (window, document) {
+
+			function Fph() {
+
+					// 承载方法名, 所有的方法名在这里会统一加上jsBridge_
+					this.prefix = 'jsBridge_';
+
+					this.jsBridge;
+			}
+
+			/*** 给Fph动态地注入方法 
+	  * @opt: {
+	  		apiList: 列出所有的api接口名, 并挂载到prototype上
+	  	}
+	  ***/
+			Fph.prototype.config = function (opt) {
+
+					// 将方法名注册进去
+					this.jsBridge = opt.apiList || [];
+					this.debug = opt.debug || false; // 是否开启调试模式
+					this.invoke();
+			};
+
+			/*** 将apilist中的方法名挂载到Fph的prototype上
+	  ***/
+			Fph.prototype.invoke = function () {
+
+					var f = this;
+					var prefix = f.prefix;
+					var jsBridgeArr = f.jsBridge;
+
+					jsBridgeArr.map(function (ele) {
+
+							Fph.prototype[ele] = function (opt) {
+
+									// 每一个方法的执行兼容ios与android的方法
+									var fnName = [prefix, ele].join('');
+									f.facadeRunBridge(fnName, opt);
+							};
+					});
+			};
+
+			// 使用facade模式封装兼容性地调用方法, 来尝试调用ios与andriod的方法, 如果两者都没有, 则调用失败回调函数
+			Fph.prototype.facadeRunBridge = function (fnName, opt) {
+
+					// 传入的是json Object, 但是给到app端的是json格式的字符串
+					var jsonStr = '';
+					var f = this;
+
+					// 检测成功回调
+					if (opt && typeof opt.success === 'function') {
+
+							// 执行全局方法
+							window.fphAppCallJs = function () {
+
+									var args = Array.prototype.slice.call(arguments);
+
+									opt.success.apply(this, args);
+							};
+					}
+
+					// 检测失败回调
+					if (opt && typeof opt.error === 'function') {
+
+							window.fphAppCallJsErr = function () {
+
+									var args = Array.prototype.slice.call(arguments);
+
+									opt.error.apply(this, args);
+							};
+					}
+
+					if ((typeof opt === 'undefined' ? 'undefined' : _typeof(opt)) === 'object') {
+
+							jsonStr = JSON.stringify(opt);
+					};
+
+					// 尝试调用三端方法
+					try {
+							//ios
+
+							window[fnName](jsonStr);
+					} catch (e) {
+
+							// console.log(e);
+
+							try {
+									// android
+
+									window.android[fnName](jsonStr);
+							} catch (e) {
+									// browser
+
+									if (f.debug) {
+											// 如果开启了调试模式, 则打印错误信息
+
+											console.log(e);
+											console.log(fnName);
+									}
+
+									if (opt && typeof opt.error === 'function') {
+											opt.error(fnName);
+									}
+							}
+					}
+			};
+
+			// 展示当前Fph里面所有的方法名
+			Fph.prototype.toString = function () {
+
+					var f = this;
+					return f.jsBridge;
+			};
+
+			window.fph = new Fph();
+	})(window, document);
 
 /***/ }
 /******/ ]);
