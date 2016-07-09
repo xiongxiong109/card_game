@@ -42,6 +42,11 @@ module.exports = {
 			type: 'post'
 		},
 
+		change: { // 换一张
+			url: '/activity/changeflip',
+			type: 'post'
+		},
+
 		exit: { // 退出接口
 			url: '/activity/exitflip',
 			type: 'post'

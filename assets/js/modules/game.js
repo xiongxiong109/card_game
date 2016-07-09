@@ -5,7 +5,7 @@ class Game {
 	constructor(opt) {
 
 		this.opt = opt;
-
+		this.binded = false; // 单例绑定事件, 当第一次执行bindEvents的时候, 将该值置为true, 从此以后将再也无法重复绑定事件
 		// 引入app交互方法
 		this.Act = require('./fphAppAction');
 
@@ -14,6 +14,7 @@ class Game {
 			$cardList: $(".card-box-list"),
 			$counterNum: $(".counter-box em"),
 			$loadingWrap: $(".loading-wrap"),
+			$mainWrap: $(".main-wrap"),
 
 			$maskWrap: $(".mask-wrap"),
 			$maskCard: $(".mask-card"), // 卡片
@@ -27,9 +28,9 @@ class Game {
 			$switchCard: $(".switch-card"),
 			$footerTipBox: $(".footer-tip-box"),
 
-			$maskRstWrap: $('.mask-rst-wrap'), // 抽奖结果
-			$maskFnBtn: $('.mask-fn-btn'),
-			$maskTip: $('.mask-tip'),
+			$maskRstWrap: $(".mask-rst-wrap"), // 抽奖结果
+			$maskFnBtn: $(".mask-fn-btn"),
+			$maskTip: $(".mask-tip"),
 			$rstImg: $("#rstImg")
 
 		}
@@ -116,22 +117,6 @@ class Game {
 
 			}
 
-			// 检测翻牌城市
-			// _this.showDialog({
-
-			// 	txt: '<p>当前城市与上次翻牌城市不一致!</p><p>是否切换回翻牌城市继续翻牌?</p>',
-			// 	confirmOnly: false,
-			// 	confirmTxt: '切换',
-			// 	cancelTxt: '否',
-			// 	confirm: function() { // 关闭翻牌webview, 回首页
-			// 		_this.createCardPanel();
-			// 	},
-			// 	cancel: function() { // 不做任何处理
-
-			// 	}
-
-			// });
-
 		});
 
 	}
@@ -182,13 +167,27 @@ class Game {
 		// d.$maskFnBtn
 		// d.$maskTip
 		// d.$rstImg
-		if ($.isEmptyObject(obj.gift)) { // 没有抽到奖
+		if ($.isEmptyObject(obj.gift) || obj.had_gift == 2) { // 奖项为空或者没有抽到奖
 
 			d.$rstImg[0].className = 'suprise-icon icon-empty';
 			d.$maskRstWrap.html(`<p>很遗憾，今天什么都没捞着！</p>`);
 			d.$maskFnBtn.html(`<p class="close-btn">随便逛逛</p>`); // 点随便逛逛, 关闭当前翻翻乐
 
 		} else {
+
+			if (obj.gift.type == 1) { // 礼品券
+				d.$rstImg[0].className = 'suprise-icon icon-sale';
+			} else if (obj.gift.type == 2) { // 路费宝
+				d.$rstImg[0].className = 'suprise-icon icon-hongbao';
+			}
+			
+			d.$maskRstWrap.html(`
+				<p>恭喜您，获得<em>“${obj.gift.name}”</em>奖励!</p>
+				<p>为自己的坚持点个赞吧!</p>
+			`);
+
+			d.$maskFnBtn.html(`<p class="check-gift-btn">查看我的奖励</p>`); // 点查看我的奖励, 跳转到我的礼券
+			d.$maskTip.html(`<p>领取规则见“我的奖励”</p>`);
 
 		}
 
@@ -454,6 +453,17 @@ class Game {
 
 		var isRunning = false;
 
+		// bindEvents方法在页面不刷新的情况下, 只会执行一次
+		if (!_this.binded) {
+
+			_this.binded = true;
+
+		} else {
+
+			return false;
+
+		}
+
 		// 给可以翻牌的卡片绑定点击事件
 		d.$cardList.delegate('.can-flip', 'tap', function() {
 
@@ -621,6 +631,118 @@ class Game {
 
 		});
 
+		// 查看我的奖励, 点击后调用app方法, 跳转我的礼券页面
+		d.$maskFnBtn.delegate('.check-gift-btn', 'tap', function() {
+			
+			_this.Act.goToGift();
+
+		});
+
+		// 查看楼盘按钮, 点击后跳转app的楼盘详情页面
+		d.$footerTipBox.delegate('.go-house', 'tap', function() {
+			
+			var pid = $(this).data('pid');
+			// console.log(pid);
+			_this.Act.goToProperty(pid);
+
+		});
+
+		// 左上角关闭按钮
+		d.$mainWrap.delegate('.close-btn', 'tap', function() {
+
+			_this.exitFlip();
+
+		});
+
+		// 换一张
+		d.$mainWrap.delegate('.switch-card', 'tap', function() {
+
+			// 构造ajax请求
+			var _ajax = $.extend({}, o.ajaxApi.change, {
+
+				data: {
+					t: o.userInfo.t,
+					_t: o.userInfo._t,
+					flip_id: o.flipInfo.flip_id,
+					city: o.userInfo.city,
+					current_city: o.userInfo.current_city,
+					lt: o.userInfo.lt
+				},
+
+				success: function(data) {
+
+					// 清空记录, 刷新翻牌
+					let {returnObject} = data;
+
+					if (!$.isEmptyObject(returnObject)) {
+
+						// 重置游戏数据
+						$.extend(o.flipInfo, returnObject);
+						_this.clearAndRestart();
+
+					} 
+
+				}
+
+			});
+
+			// 如果用户已经翻过牌(剩余天数小于总天数, 则认为翻过牌)
+			if( parseInt(o.flipInfo.surplus_times) < Math.pow(parseInt(o.flipInfo.flip_model), 2) ) {
+
+				_this.showDialog({
+					txt: '<p>您之前的翻牌记录将被重置，下次将重头开始，确认要换一张吗?</p>',
+					confirmTxt: '是的',
+					cancelTxt: '算了',
+					confirm: function() {
+						$.ajax(_ajax);
+					}
+
+				});
+
+			}
+
+		});
+	}
+
+	// 清空记录, 重新翻牌
+	clearAndRestart() {
+
+		var _this = this;
+		var d = _this.doms;
+		var o = _this.opt;
+
+		let counter = 0;
+
+		d.$cardList.css('background-image', 'none');
+		var $cards = d.$cardList.find('.card-item');
+
+		$cards.each(function(idx, ele) {
+
+			var $self = $(ele);
+			var curL = $self.offset().left;
+			var curT = $self.offset().top;
+
+			$self.animate({
+				'left': (d.$cardList.width() - $self.width()) / 2,
+				'top': (d.$cardList.height() - $self.height()) / 2,
+				'scale': '0',
+				'opacity': 0,
+				'rotateY': `${-idx * 15}deg`,
+				'rotateX': `${idx * 15}deg`
+			}, Math.random() * 300 + 300, 'ease-in', function() {
+
+				$self.remove();
+				counter++;
+
+				if (counter >= $cards.length) {
+
+					_this.init();
+
+				}
+
+			});
+
+		});
 	}
 
 	AnimateGoRotate($card) {

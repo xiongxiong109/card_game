@@ -16,9 +16,9 @@ module.exports = function(req, res, next) {
         "is_over": 1,
         "msg": "活动已失效",
         "gift": {
-           // "img": "aa.jpg", // 礼品图
-           // "type": 1, // 礼品类型
-           // "name": "礼品名" // 礼品名
+           "img": "aa.jpg", // 礼品图
+           "type": 2, // 礼品类型
+           "name": "礼品名" // 礼品名
         }
     }
 	}

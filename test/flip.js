@@ -14,9 +14,9 @@ module.exports = function(req, res, next) {
 			"is_can_flip": 1, // 是否可翻牌
 			"flip_img": "/assets/img/house.jpg",
 			"gift_img": "/assets/img/gift.jpg",
-			"flip_model": 2,
+			"flip_model": 4,
 			"is_invalid": 2,
-			"surplus_times": 4, // 剩余天数
+			"surplus_times": 15, // 剩余天数
 			"flip_rule": "每天翻一次，有惊喜哦，连续翻完所有拼图后，有机会赢得大奖！",
 			"offer": "合景叠彩园",
 			"pid": 129,
