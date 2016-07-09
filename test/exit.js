@@ -8,7 +8,7 @@ module.exports = function(req, res, next) {
     "msg": "OK",
     "returnValue": "",
     "returnObject":{
-        "status":1
+        "status": 1
     }
 	}
 

@@ -14,16 +14,23 @@ class Game {
 			$cardList: $(".card-box-list"),
 			$counterNum: $(".counter-box em"),
 			$loadingWrap: $(".loading-wrap"),
+
 			$maskWrap: $(".mask-wrap"),
 			$maskCard: $(".mask-card"), // 卡片
 			$maskClose: $(".mask-close"),
-			$maskFnBtn: $(".mask-fn-btn"),
-			$rstImg: $("#rstImg"),
 			$maskLoading: $(".mask-loading"), // loading
+
 			$maskDialogWrap: $(".mask-dialog"), // 对话框
 			$dialogBox: $(".dialog-box"),
 			$dialogBtnWrap: $(".dialog-btn-wrap"),
-			$dialogTxt: $(".dialog-txt")
+			$dialogTxt: $(".dialog-txt"),
+			$switchCard: $(".switch-card"),
+			$footerTipBox: $(".footer-tip-box"),
+
+			$maskRstWrap: $('.mask-rst-wrap'), // 抽奖结果
+			$maskFnBtn: $('.mask-fn-btn'),
+			$maskTip: $('.mask-tip'),
+			$rstImg: $("#rstImg")
 
 		}
 
@@ -42,34 +49,61 @@ class Game {
 
 			let {flipInfo, userInfo} = o;
 
+			// 渲染活动规则与大奖提供方等等
+			_this.renderTxt();
+
 			// 状态机
-			if (flipInfo.has_flip == 1) { // 1.有有效活动
+			if (flipInfo.has_flip == 1) { // 有有效活动
 
 				if (flipInfo.is_invalid == 1) { // 已经违规
 
-					if (flipInfo.is_change == 1) { // 是否可以换一张
-						
+					if (flipInfo.is_change == 1) { // 已经违规, 但是可以换一张
+
 						_this.showDialog({
 							txt: '<p>很遗憾，您已无法完成翻牌活动，换一张试试~</p>',
 							confirmTxt: '好的',
 							cancelTxt: '算了',
+
+							confirm: function() {
+
+								d.$switchCard.show();
+
+							},
+
 							cancel: function() {
 								// 退出翻牌
 								_this.exitFlip();
 							}
+
 						});
 
-					} else {
-						console.log('已经违规, 并且不可换了');
+					} else { // 已经违规并且不可换一张了, 提示
+
+						d.$switchCard.remove();
+
+						_this.showDialog({
+							txt: '<p>很遗憾，您已无法完成翻牌活动，活动结束~</p>',
+							confirmOnly: true,
+							confirmTxt: '朕知道了'
+						});
+
 					}
 
 				} else { // 没有违规, 可继续翻牌, 走正常的翻牌初始化
 
-					console.log('start');
+					if (flipInfo.is_change == 1) { // 如果可以换一张
+
+						d.$switchCard.show();
+
+					} else {
+						d.$switchCard.remove();
+					}
+
+					_this.createCardPanel();
 
 				}
 
-			} else { // 2.无有效活动, 提示msg并关闭
+			} else { // 无有效活动, 提示msg并关闭
 
 				_this.showDialog({
 					txt: `<p>${flipInfo.msg}</p>`,
@@ -102,6 +136,64 @@ class Game {
 
 	}
 
+	// 拼接活动信息相关dom
+	renderTxt() {
+
+		var _this = this;
+		var o = _this.opt;
+		var d = _this.doms;
+		var {flipInfo} = o;
+
+		var domStr = '';
+
+		if (!$.isEmptyObject(flipInfo.flip_rule)) { // 活动规则
+
+			domStr += `<p>${flipInfo.flip_rule}</p>`;
+
+		}
+
+		if (!$.isEmptyObject(flipInfo.offer)) { // 活动大奖提供方
+
+			if (flipInfo.offer === '房品汇') {
+
+				domStr += `<p>本次大奖提供方：${flipInfo.offer}</p>`
+
+			} else {
+
+				domStr += `
+				<p>
+					本次大奖提供方：${flipInfo.offer}
+					<a href="javascript:void(0);" class="go-house" data-pid="${flipInfo.pid}">查看楼盘</a>
+				</p>
+				`;
+			}
+		}
+
+		d.$footerTipBox.html(domStr);
+
+	}
+
+	// 渲染抽奖结果
+	renderRst(obj) {
+
+		var _this = this;
+		var d = _this.doms;
+		// d.$maskRstWrap
+		// d.$maskFnBtn
+		// d.$maskTip
+		// d.$rstImg
+		if ($.isEmptyObject(obj.gift)) { // 没有抽到奖
+
+			d.$rstImg[0].className = 'suprise-icon icon-empty';
+			d.$maskRstWrap.html(`<p>很遗憾，今天什么都没捞着！</p>`);
+			d.$maskFnBtn.html(`<p class="close-btn">随便逛逛</p>`); // 点随便逛逛, 关闭当前翻翻乐
+
+		} else {
+
+		}
+
+	}
+
 	// 退出翻牌, 先调用api的退出接口, 调用成功后, 调用app的退出方法
 	exitFlip() {
 
@@ -117,7 +209,12 @@ class Game {
 			},
 
 			success: function(data) {
-				console.log(data);
+
+				var returnObj = data.returnObject;
+
+				if (!$.isEmptyObject(returnObj)) {
+
+				}
 
 				_this.Act.closePage();
 				
@@ -203,14 +300,15 @@ class Game {
 		var _this = this;
 		var d = _this.doms;
 		var o = _this.opt;
+		var {flipInfo} = o;
 
 		// 大奖图片
-		var bgImg = o.bgImg;
+		var bgImg = flipInfo.gift_img;
 		// 活动楼盘图片
-		var houseImg = o.houseImg;
+		var houseImg = flipInfo.flip_img;
 
 		// 创建拼图
-		_this.createCardItems(_this.opt.num, houseImg, function() {
+		_this.createCardItems(flipInfo.flip_model, houseImg, function() {
 
 			d.$cardList.css({
 				'background-image': `url(${bgImg})`
@@ -251,10 +349,11 @@ class Game {
 
 		$cardItems = $(".card-item"); // 更新最新dom
 
+		var beforeNums = $cardItems.length - parseInt(o.flipInfo.surplus_times);
 		// 如果今天可以翻牌, 则给当前可以翻动的块加上高亮样式(只在创建的时候加上can-flip, 调整宽高样式的时候不能做添加高亮处理)
-		if (o.canFlip == true) {
+		if (o.flipInfo.is_can_flip == 1) {
 
-			$cardItems.eq(o.curIdx).addClass('can-flip');
+			$cardItems.eq(beforeNums).addClass('can-flip');
 
 		}
 
@@ -300,13 +399,14 @@ class Game {
 			}
 		}
 
+		let beforeNums = $cardItems.length - parseInt(o.flipInfo.surplus_times);
 		// 当前可翻牌，且不是最后一张牌
-		if (o.curIdx < $cardItems.length) {
+		if ( beforeNums >= 0) {
 
 			// 将前面的牌给翻开
 			$cardItems.each(function(idx, ele) {
 
-				if (idx < o.curIdx) {
+				if (idx < beforeNums) {
 
 					$(ele).hide();
 
@@ -315,8 +415,10 @@ class Game {
 			});
 
 		} else { // 表示翻牌结束
+
 			//...
 			$cardItems.remove();
+
 		}
 
 		// 显示剩余天数, 最小不能小于0了
@@ -333,9 +435,13 @@ class Game {
 		var _this = this;
 		var o = _this.opt;
 		var d = _this.doms;
+
+		var {surplus_times} = o.flipInfo;
+
 		var $cardItems = $(".card-item");
 
-		var disDay = Math.max($cardItems.length - o.curIdx, 0);
+		var disDay = Math.max(parseInt(surplus_times), 0);
+
 		d.$counterNum.text(disDay);
 
 	}	
@@ -356,7 +462,7 @@ class Game {
 			$self.removeClass('can-flip');
 
 			// 签到ajax配置
-			let _ajax = $.extend({}, o.ajaxApi.sign, {
+			let _ajax = $.extend({}, o.ajaxApi.clickFlip, {
 
 				data: {
 					uId: o.uId
@@ -364,13 +470,70 @@ class Game {
 
 				success: function(data) {
 
-					// 对该块进行动画操作
-					_this.AnimateGoRotate($self);
-					// 计算剩余天数
-					o.curIdx++;
-					_this.countDisDay();
-					// 渲染抽奖结果
-					// ...
+					let {returnObject} = data;
+
+					if (!$.isEmptyObject(returnObject)) {
+
+						if (returnObject.is_invalid == 1) { // 活动已失效
+
+							_this.showDialog({
+
+								txt: `<p>${returnObject.msg}</p>`,
+								confirmOnly: true,
+								confirmTxt: '朕知道了',
+								confirm: function() {
+
+									$self.addClass('can-flip');
+
+								}
+
+							});
+
+						} else { // 活动还没失效
+
+							if (returnObject.is_change == 1) { // 需要切换城市
+
+								_this.showDialog({
+
+									txt: '<p>当前城市与上次翻牌城市不一致!</p><p>是否切换回翻牌城市继续翻牌?</p>',
+									confirmOnly: false,
+									confirmTxt: '切换',
+									cancelTxt: '否',
+									confirm: function() { // 关闭翻牌webview, 回首页
+										_this.Act.goToIndex();
+									},
+									cancel: function() { // 不做任何处理
+										$self.addClass('can-flip');
+									}
+
+								});
+
+							} else { 
+								
+								if (returnObject.is_can_flip == 1) { // 可以翻牌
+
+									// 渲染抽奖结果
+									_this.renderRst(returnObject);
+									// 对该块进行动画操作
+									_this.AnimateGoRotate($self);
+									// 计算剩余天数
+									o.flipInfo.surplus_times--;
+									_this.countDisDay();
+
+								} else {
+
+									_this.showDialog({
+										txt: `<p>你今天已经翻过牌啦, 明天再过来吧</p>`,
+										confirmOnly: true
+									});
+
+								}
+
+							}
+
+						}
+
+					}
 
 				},
 
@@ -395,7 +558,7 @@ class Game {
 			// _this.AnimateGoRotate($self);
 
 			// 计算剩余天数
-			// o.curIdx++;
+			// o.flipInfo.surplus_times--;
 			// _this.countDisDay();
 
 			// ajax签到抽奖
@@ -421,11 +584,40 @@ class Game {
 
 				}, 400, function() {
 
+					d.$maskCard.removeClass('visible');
 					d.$maskWrap.hide();
 
 				});
 
 			});
+
+		});
+
+		// 阻止事件冒泡
+		d.$maskCard.on('tap', function(e) {
+
+			e.stopPropagation();
+
+		});
+
+		// 点击遮罩区域也可以收起卡片
+		d.$maskWrap.on('tap', function() {
+
+			if( d.$maskCard.hasClass('visible') ) {
+
+				d.$maskClose.trigger('tap');
+
+			}
+
+		});
+
+		// 随便逛逛, 点击后关闭退出
+		d.$maskFnBtn.delegate('.close-btn', 'tap', function() {
+
+			d.$maskClose.trigger('tap');
+			setTimeout(function() {
+				_this.exitFlip();
+			}, 500);
 
 		});
 
@@ -438,7 +630,7 @@ class Game {
 		let t = _this.timeLine;
 
 		// 让卡片的层级处于所有卡片的最高等级
-		$card.css('zIndex', Math.pow(_this.opt.num, 2));
+		$card.css('z-index', Math.pow(_this.opt.flipInfo.flip_model, 2));
 
 		// 卡片旋转
 		// t.add('rotateAndMove');
@@ -509,6 +701,7 @@ class Game {
 			}, 0, function() {
 
 				d.$maskCard
+				.addClass('visible') // 处于可见状态
 				.show()
 				.animate({
 

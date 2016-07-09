@@ -9,14 +9,16 @@ module.exports = function(req, res, next) {
     "msg": "OK",
     "returnValue": "",
     "returnObject":{
-        "is_change": 1,
+        "is_change": 2,
+        "is_invalid": 2,
         "had_gift": 1,
         "is_can_flip": 1,
         "is_over": 1,
+        "msg": "活动已失效",
         "gift": {
-           "img": "aa.jpg",
-           "type": 1,
-           "name": "礼品名"
+           // "img": "aa.jpg", // 礼品图
+           // "type": 1, // 礼品类型
+           // "name": "礼品名" // 礼品名
         }
     }
 	}

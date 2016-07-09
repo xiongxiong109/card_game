@@ -69,7 +69,7 @@ var gameConfig = Config;
 					// 添加窗口尺寸变化监听
 					$(window).on('resize', function() {
 
-						cardGame.reStyleCardItems(gameConfig.num, gameConfig.houseImg);
+						cardGame.reStyleCardItems(gameConfig.flipInfo.flip_model, gameConfig.flipInfo.flip_img);
 
 					});
 

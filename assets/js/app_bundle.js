@@ -50,17 +50,17 @@
 
 	var _game2 = _interopRequireDefault(_game);
 
-	var _config = __webpack_require__(2);
+	var _config = __webpack_require__(4);
 
 	var _config2 = _interopRequireDefault(_config);
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 	// zepto
-	__webpack_require__(3);
+	__webpack_require__(5);
 
 	// resize模块, 动态计算页面尺寸
-	__webpack_require__(4);
+	__webpack_require__(6);
 
 	// 游戏主体
 
@@ -69,7 +69,7 @@
 
 
 	// 引入app交互方法
-	var Act = __webpack_require__(5);
+	var Act = __webpack_require__(2);
 
 	/**引入游戏开始前用户信息分析模块
 	 * @ 模块进行异步操作进行各种复杂的前期处理
@@ -127,7 +127,7 @@
 													// 添加窗口尺寸变化监听
 													$(window).on('resize', function () {
 
-															cardGame.reStyleCardItems(gameConfig.num, gameConfig.houseImg);
+															cardGame.reStyleCardItems(gameConfig.flipInfo.flip_model, gameConfig.flipInfo.flip_img);
 													});
 											})();
 									} else {
@@ -191,23 +191,30 @@
 					this.opt = opt;
 
 					// 引入app交互方法
-					this.Act = __webpack_require__(5);
+					this.Act = __webpack_require__(2);
 
 					this.doms = {
 
 							$cardList: $(".card-box-list"),
 							$counterNum: $(".counter-box em"),
 							$loadingWrap: $(".loading-wrap"),
+
 							$maskWrap: $(".mask-wrap"),
 							$maskCard: $(".mask-card"), // 卡片
 							$maskClose: $(".mask-close"),
-							$maskFnBtn: $(".mask-fn-btn"),
-							$rstImg: $("#rstImg"),
 							$maskLoading: $(".mask-loading"), // loading
+
 							$maskDialogWrap: $(".mask-dialog"), // 对话框
 							$dialogBox: $(".dialog-box"),
 							$dialogBtnWrap: $(".dialog-btn-wrap"),
-							$dialogTxt: $(".dialog-txt")
+							$dialogTxt: $(".dialog-txt"),
+							$switchCard: $(".switch-card"),
+							$footerTipBox: $(".footer-tip-box"),
+
+							$maskRstWrap: $('.mask-rst-wrap'), // 抽奖结果
+							$maskFnBtn: $('.mask-fn-btn'),
+							$maskTip: $('.mask-tip'),
+							$rstImg: $("#rstImg")
 
 					};
 			}
@@ -230,36 +237,62 @@
 									var flipInfo = o.flipInfo;
 									var userInfo = o.userInfo;
 
-									// 状态机
+									// 渲染活动规则与大奖提供方等等
 
+									_this.renderTxt();
+
+									// 状态机
 									if (flipInfo.has_flip == 1) {
-											// 1.有有效活动
+											// 有有效活动
 
 											if (flipInfo.is_invalid == 1) {
 													// 已经违规
 
 													if (flipInfo.is_change == 1) {
-															// 是否可以换一张
+															// 已经违规, 但是可以换一张
 
 															_this.showDialog({
 																	txt: '<p>很遗憾，您已无法完成翻牌活动，换一张试试~</p>',
 																	confirmTxt: '好的',
 																	cancelTxt: '算了',
+
+																	confirm: function confirm() {
+
+																			d.$switchCard.show();
+																	},
+
 																	cancel: function cancel() {
 																			// 退出翻牌
 																			_this.exitFlip();
 																	}
+
 															});
 													} else {
-															console.log('已经违规, 并且不可换了');
+															// 已经违规并且不可换一张了, 提示
+
+															d.$switchCard.remove();
+
+															_this.showDialog({
+																	txt: '<p>很遗憾，您已无法完成翻牌活动，活动结束~</p>',
+																	confirmOnly: true,
+																	confirmTxt: '朕知道了'
+															});
 													}
 											} else {
 													// 没有违规, 可继续翻牌, 走正常的翻牌初始化
 
-													console.log('start');
+													if (flipInfo.is_change == 1) {
+															// 如果可以换一张
+
+															d.$switchCard.show();
+													} else {
+															d.$switchCard.remove();
+													}
+
+													_this.createCardPanel();
 											}
 									} else {
-											// 2.无有效活动, 提示msg并关闭
+											// 无有效活动, 提示msg并关闭
 
 											_this.showDialog({
 													txt: "<p>" + flipInfo.msg + "</p>",
@@ -289,6 +322,62 @@
 							});
 					}
 
+					// 拼接活动信息相关dom
+
+			}, {
+					key: "renderTxt",
+					value: function renderTxt() {
+
+							var _this = this;
+							var o = _this.opt;
+							var d = _this.doms;
+							var flipInfo = o.flipInfo;
+
+
+							var domStr = '';
+
+							if (!$.isEmptyObject(flipInfo.flip_rule)) {
+									// 活动规则
+
+									domStr += "<p>" + flipInfo.flip_rule + "</p>";
+							}
+
+							if (!$.isEmptyObject(flipInfo.offer)) {
+									// 活动大奖提供方
+
+									if (flipInfo.offer === '房品汇') {
+
+											domStr += "<p>本次大奖提供方：" + flipInfo.offer + "</p>";
+									} else {
+
+											domStr += "\n\t\t\t\t<p>\n\t\t\t\t\t本次大奖提供方：" + flipInfo.offer + "\n\t\t\t\t\t<a href=\"javascript:void(0);\" class=\"go-house\" data-pid=\"" + flipInfo.pid + "\">查看楼盘</a>\n\t\t\t\t</p>\n\t\t\t\t";
+									}
+							}
+
+							d.$footerTipBox.html(domStr);
+					}
+
+					// 渲染抽奖结果
+
+			}, {
+					key: "renderRst",
+					value: function renderRst(obj) {
+
+							var _this = this;
+							var d = _this.doms;
+							// d.$maskRstWrap
+							// d.$maskFnBtn
+							// d.$maskTip
+							// d.$rstImg
+							if ($.isEmptyObject(obj.gift)) {
+									// 没有抽到奖
+
+									d.$rstImg[0].className = 'suprise-icon icon-empty';
+									d.$maskRstWrap.html("<p>很遗憾，今天什么都没捞着！</p>");
+									d.$maskFnBtn.html("<p class=\"close-btn\">随便逛逛</p>"); // 点随便逛逛, 关闭当前翻翻乐
+							} else {}
+					}
+
 					// 退出翻牌, 先调用api的退出接口, 调用成功后, 调用app的退出方法
 
 			}, {
@@ -307,7 +396,10 @@
 									},
 
 									success: function success(data) {
-											console.log(data);
+
+											var returnObj = data.returnObject;
+
+											if (!$.isEmptyObject(returnObj)) {}
 
 											_this.Act.closePage();
 									}
@@ -396,14 +488,16 @@
 							var _this = this;
 							var d = _this.doms;
 							var o = _this.opt;
+							var flipInfo = o.flipInfo;
 
 							// 大奖图片
-							var bgImg = o.bgImg;
+
+							var bgImg = flipInfo.gift_img;
 							// 活动楼盘图片
-							var houseImg = o.houseImg;
+							var houseImg = flipInfo.flip_img;
 
 							// 创建拼图
-							_this.createCardItems(_this.opt.num, houseImg, function () {
+							_this.createCardItems(flipInfo.flip_model, houseImg, function () {
 
 									d.$cardList.css({
 											'background-image': "url(" + bgImg + ")"
@@ -445,10 +539,11 @@
 
 							$cardItems = $(".card-item"); // 更新最新dom
 
+							var beforeNums = $cardItems.length - parseInt(o.flipInfo.surplus_times);
 							// 如果今天可以翻牌, 则给当前可以翻动的块加上高亮样式(只在创建的时候加上can-flip, 调整宽高样式的时候不能做添加高亮处理)
-							if (o.canFlip == true) {
+							if (o.flipInfo.is_can_flip == 1) {
 
-									$cardItems.eq(o.curIdx).addClass('can-flip');
+									$cardItems.eq(beforeNums).addClass('can-flip');
 							}
 					}
 
@@ -495,19 +590,21 @@
 									}
 							}
 
+							var beforeNums = $cardItems.length - parseInt(o.flipInfo.surplus_times);
 							// 当前可翻牌，且不是最后一张牌
-							if (o.curIdx < $cardItems.length) {
+							if (beforeNums >= 0) {
 
 									// 将前面的牌给翻开
 									$cardItems.each(function (idx, ele) {
 
-											if (idx < o.curIdx) {
+											if (idx < beforeNums) {
 
 													$(ele).hide();
 											}
 									});
 							} else {
 									// 表示翻牌结束
+
 									//...
 									$cardItems.remove();
 							}
@@ -528,9 +625,14 @@
 							var _this = this;
 							var o = _this.opt;
 							var d = _this.doms;
+
+							var surplus_times = o.flipInfo.surplus_times;
+
+
 							var $cardItems = $(".card-item");
 
-							var disDay = Math.max($cardItems.length - o.curIdx, 0);
+							var disDay = Math.max(parseInt(surplus_times), 0);
+
 							d.$counterNum.text(disDay);
 					}
 					// 事件绑定, 给签到绑定点击事件
@@ -553,21 +655,76 @@
 									$self.removeClass('can-flip');
 
 									// 签到ajax配置
-									var _ajax = $.extend({}, o.ajaxApi.sign, {
+									var _ajax = $.extend({}, o.ajaxApi.clickFlip, {
 
 											data: {
 													uId: o.uId
 											},
 
 											success: function success(data) {
+													var returnObject = data.returnObject;
 
-													// 对该块进行动画操作
-													_this.AnimateGoRotate($self);
-													// 计算剩余天数
-													o.curIdx++;
-													_this.countDisDay();
-													// 渲染抽奖结果
-													// ...
+
+													if (!$.isEmptyObject(returnObject)) {
+
+															if (returnObject.is_invalid == 1) {
+																	// 活动已失效
+
+																	_this.showDialog({
+
+																			txt: "<p>" + returnObject.msg + "</p>",
+																			confirmOnly: true,
+																			confirmTxt: '朕知道了',
+																			confirm: function confirm() {
+
+																					$self.addClass('can-flip');
+																			}
+
+																	});
+															} else {
+																	// 活动还没失效
+
+																	if (returnObject.is_change == 1) {
+																			// 需要切换城市
+
+																			_this.showDialog({
+
+																					txt: '<p>当前城市与上次翻牌城市不一致!</p><p>是否切换回翻牌城市继续翻牌?</p>',
+																					confirmOnly: false,
+																					confirmTxt: '切换',
+																					cancelTxt: '否',
+																					confirm: function confirm() {
+																							// 关闭翻牌webview, 回首页
+																							_this.Act.goToIndex();
+																					},
+																					cancel: function cancel() {
+																							// 不做任何处理
+																							$self.addClass('can-flip');
+																					}
+
+																			});
+																	} else {
+
+																			if (returnObject.is_can_flip == 1) {
+																					// 可以翻牌
+
+																					// 渲染抽奖结果
+																					_this.renderRst(returnObject);
+																					// 对该块进行动画操作
+																					_this.AnimateGoRotate($self);
+																					// 计算剩余天数
+																					o.flipInfo.surplus_times--;
+																					_this.countDisDay();
+																			} else {
+
+																					_this.showDialog({
+																							txt: "<p>你今天已经翻过牌啦, 明天再过来吧</p>",
+																							confirmOnly: true
+																					});
+																			}
+																	}
+															}
+													}
 											},
 
 											error: function error(xhr, status, err) {
@@ -589,7 +746,7 @@
 									// _this.AnimateGoRotate($self);
 
 									// 计算剩余天数
-									// o.curIdx++;
+									// o.flipInfo.surplus_times--;
 									// _this.countDisDay();
 
 									// ajax签到抽奖
@@ -614,9 +771,34 @@
 
 											}, 400, function () {
 
+													d.$maskCard.removeClass('visible');
 													d.$maskWrap.hide();
 											});
 									});
+							});
+
+							// 阻止事件冒泡
+							d.$maskCard.on('tap', function (e) {
+
+									e.stopPropagation();
+							});
+
+							// 点击遮罩区域也可以收起卡片
+							d.$maskWrap.on('tap', function () {
+
+									if (d.$maskCard.hasClass('visible')) {
+
+											d.$maskClose.trigger('tap');
+									}
+							});
+
+							// 随便逛逛, 点击后关闭退出
+							d.$maskFnBtn.delegate('.close-btn', 'tap', function () {
+
+									d.$maskClose.trigger('tap');
+									setTimeout(function () {
+											_this.exitFlip();
+									}, 500);
 							});
 					}
 			}, {
@@ -628,7 +810,7 @@
 							var t = _this.timeLine;
 
 							// 让卡片的层级处于所有卡片的最高等级
-							$card.css('zIndex', Math.pow(_this.opt.num, 2));
+							$card.css('z-index', Math.pow(_this.opt.flipInfo.flip_model, 2));
 
 							// 卡片旋转
 							// t.add('rotateAndMove');
@@ -689,7 +871,8 @@
 
 									}, 0, function () {
 
-											d.$maskCard.show().animate({
+											d.$maskCard.addClass('visible') // 处于可见状态
+											.show().animate({
 
 													'opacity': 1,
 													'translateY': '-50%',
@@ -835,6 +1018,216 @@
 
 /***/ },
 /* 2 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	// 与app的交互方法
+
+	__webpack_require__(3);
+
+	// 配置所需调用app接口的jsBridge
+
+	fph.config({
+		debug: true,
+		apiList: ['getUserInfo', // 获取用户信息
+		'closeViewPage', // 关闭当前webview
+		'goToProperty', // 跳转楼盘详情
+		'goToLogin', // 调用登录面板
+		'goToIndex', // 跳转首页
+		'goToGift' // 跳转礼券页面
+		]
+	});
+
+	// 获取用户信息
+	function getInfo(cb) {
+
+		var rst = {
+			t: '1f3s2df13sd', // 密钥
+			_t: 'fasd132asd', // 用户登录密钥
+			city: '上海市', // 选择城市
+			current_city: '北京市', // 当前城市
+			lt: '121.424712,31.176326' // 定位经纬度
+		};
+
+		// 调用app方法, 获取用户信息
+		// fph.getUserInfo({
+
+		// 	success: function(data) {
+		// 		cb && cb(data);
+		// 	}
+
+		// });
+
+		setTimeout(function () {
+
+			cb && cb(rst);
+		}, 1000);
+	}
+
+	// 关闭当前窗口(点击关闭按钮时, 先走php接口释放资源, 然后调app方法关闭当前窗口)
+
+	function closePage(cb) {
+
+		fph.closeViewPage();
+	}
+
+	// 跳转楼盘详情
+
+	function goToProperty(pid) {
+
+		fph.goToProperty({ pid: pid });
+	}
+
+	// 跳转登录面板
+
+	function goToLogin() {
+
+		fph.goToLogin();
+	}
+
+	// 跳转回首页
+	function goToIndex() {
+		fph.goToIndex();
+	}
+
+	// 跳转我的礼券
+	function goToGift() {
+		fph.goToGift();
+	}
+
+	module.exports = { getInfo: getInfo, closePage: closePage, goToProperty: goToProperty, goToLogin: goToLogin, goToIndex: goToIndex, goToGift: goToGift };
+
+/***/ },
+/* 3 */
+/***/ function(module, exports) {
+
+	'use strict';
+
+	var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
+
+	/** fph C端 app jsbridge beta
+	*   @author: xiongxiong109
+	**/
+	;(function (window, document) {
+
+			function Fph() {
+
+					// 承载方法名, 所有的方法名在这里会统一加上jsBridge_
+					this.prefix = 'jsBridge_';
+
+					this.jsBridge;
+			}
+
+			/*** 给Fph动态地注入方法 
+	  * @opt: {
+	  		apiList: 列出所有的api接口名, 并挂载到prototype上
+	  	}
+	  ***/
+			Fph.prototype.config = function (opt) {
+
+					// 将方法名注册进去
+					this.jsBridge = opt.apiList || [];
+					this.debug = opt.debug || false; // 是否开启调试模式
+					this.invoke();
+			};
+
+			/*** 将apilist中的方法名挂载到Fph的prototype上
+	  ***/
+			Fph.prototype.invoke = function () {
+
+					var f = this;
+					var prefix = f.prefix;
+					var jsBridgeArr = f.jsBridge;
+
+					jsBridgeArr.map(function (ele) {
+
+							Fph.prototype[ele] = function (opt) {
+
+									// 每一个方法的执行兼容ios与android的方法
+									var fnName = [prefix, ele].join('');
+									f.facadeRunBridge(fnName, opt);
+							};
+					});
+			};
+
+			// 使用facade模式封装兼容性地调用方法, 来尝试调用ios与andriod的方法, 如果两者都没有, 则调用失败回调函数
+			Fph.prototype.facadeRunBridge = function (fnName, opt) {
+
+					// 传入的是json Object, 但是给到app端的是json格式的字符串
+					var jsonStr = '';
+					var f = this;
+
+					// 检测成功回调
+					if (opt && typeof opt.success === 'function') {
+
+							// 执行全局方法
+							window.fphAppCallJs = function () {
+
+									var args = Array.prototype.slice.call(arguments);
+
+									opt.success.apply(this, args);
+							};
+					}
+
+					// 检测失败回调
+					if (opt && typeof opt.error === 'function') {
+
+							window.fphAppCallJsErr = function () {
+
+									var args = Array.prototype.slice.call(arguments);
+
+									opt.error.apply(this, args);
+							};
+					}
+
+					if ((typeof opt === 'undefined' ? 'undefined' : _typeof(opt)) === 'object') {
+
+							jsonStr = JSON.stringify(opt);
+					};
+
+					// 尝试调用三端方法
+					try {
+							//ios
+
+							window[fnName](jsonStr);
+					} catch (e) {
+
+							// console.log(e);
+
+							try {
+									// android
+
+									window.android[fnName](jsonStr);
+							} catch (e) {
+									// browser
+
+									if (f.debug) {
+											// 如果开启了调试模式, 则打印错误信息
+
+											console.log(e);
+											console.log(fnName);
+									}
+
+									if (opt && typeof opt.error === 'function') {
+											opt.error(fnName);
+									}
+							}
+					}
+			};
+
+			// 展示当前Fph里面所有的方法名
+			Fph.prototype.toString = function () {
+
+					var f = this;
+					return f.jsBridge;
+			};
+
+			window.fph = new Fph();
+	})(window, document);
+
+/***/ },
+/* 4 */
 /***/ function(module, exports) {
 
 	"use strict";
@@ -893,7 +1286,7 @@
 	};
 
 /***/ },
-/* 3 */
+/* 5 */
 /***/ function(module, exports) {
 
 	/* Zepto v1.1.6 - zepto event ajax form ie - zeptojs.com/license */
@@ -1191,7 +1584,7 @@
 	})(Zepto)
 
 /***/ },
-/* 4 */
+/* 6 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -1205,7 +1598,7 @@
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 	// 重新计算尺寸,根据屏幕尺寸，做设计图自适应
-	__webpack_require__(3);
+	__webpack_require__(5);
 	{
 		// 获取dom的class
 
@@ -1267,203 +1660,6 @@
 			AppResize.resize();
 		});
 	}
-
-/***/ },
-/* 5 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	// 与app的交互方法
-
-	__webpack_require__(6);
-
-	// 配置所需调用app接口的jsBridge
-
-	fph.config({
-		debug: true,
-		apiList: ['getUserInfo', // 获取用户信息
-		'closeViewPage', // 关闭当前webview
-		'goToProperty', // 跳转楼盘详情
-		'goToLogin']
-	});
-
-	// 获取用户信息
-	function getInfo(cb) {
-
-		var rst = {
-			t: '1f3s2df13sd', // 密钥
-			_t: 'fasd132asd', // 用户登录密钥
-			city: '上海市', // 选择城市
-			current_city: '北京市', // 当前城市
-			lt: '121.424712,31.176326' // 定位经纬度
-		};
-
-		// 调用app方法, 获取用户信息
-		// fph.getUserInfo({
-
-		// 	success: function(data) {
-		// 		cb && cb(data);
-		// 	}
-
-		// });
-
-		setTimeout(function () {
-
-			cb && cb(rst);
-		}, 1000);
-	}
-
-	// 关闭当前窗口(点击关闭按钮时, 先走php接口释放资源, 然后调app方法关闭当前窗口)
-
-	function closePage(cb) {
-
-		fph.closeViewPage();
-	}
-
-	// 跳转楼盘详情
-
-	function goToProperty(pid) {
-
-		fph.goToProperty({ pid: pid });
-	}
-
-	// 跳转登录面板
-
-	function goToLogin() {
-
-		fph.goToLogin();
-	}
-
-	module.exports = { getInfo: getInfo, closePage: closePage, goToProperty: goToProperty, goToLogin: goToLogin };
-
-/***/ },
-/* 6 */
-/***/ function(module, exports) {
-
-	'use strict';
-
-	var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
-
-	/** fph C端 app jsbridge beta
-	*   @author: xiongxiong109
-	**/
-	;(function (window, document) {
-
-			function Fph() {
-
-					// 承载方法名, 所有的方法名在这里会统一加上jsBridge_
-					this.prefix = 'jsBridge_';
-
-					this.jsBridge;
-			}
-
-			/*** 给Fph动态地注入方法 
-	  * @opt: {
-	  		apiList: 列出所有的api接口名, 并挂载到prototype上
-	  	}
-	  ***/
-			Fph.prototype.config = function (opt) {
-
-					// 将方法名注册进去
-					this.jsBridge = opt.apiList || [];
-					this.debug = opt.debug || false; // 是否开启调试模式
-					this.invoke();
-			};
-
-			/*** 将apilist中的方法名挂载到Fph的prototype上
-	  ***/
-			Fph.prototype.invoke = function () {
-
-					var f = this;
-					var prefix = f.prefix;
-					var jsBridgeArr = f.jsBridge;
-
-					jsBridgeArr.map(function (ele) {
-
-							Fph.prototype[ele] = function (opt) {
-
-									// 每一个方法的执行兼容ios与android的方法
-									var fnName = [prefix, ele].join('');
-									f.facadeRunBridge(fnName, opt);
-							};
-					});
-			};
-
-			// 使用facade模式封装兼容性地调用方法, 来尝试调用ios与andriod的方法, 如果两者都没有, 则调用失败回调函数
-			Fph.prototype.facadeRunBridge = function (fnName, opt) {
-
-					// 传入的是json Object, 但是给到app端的是json格式的字符串
-					var jsonStr = '';
-					var f = this;
-
-					// 检测成功回调
-					if (opt && typeof opt.success === 'function') {
-
-							// 执行全局方法
-							window.fphAppCallJs = function () {
-
-									var args = Array.prototype.slice.call(arguments);
-
-									opt.success.apply(this, args);
-							};
-					}
-
-					// 检测失败回调
-					if (opt && typeof opt.error === 'function') {
-
-							window.fphAppCallJsErr = function () {
-
-									var args = Array.prototype.slice.call(arguments);
-
-									opt.error.apply(this, args);
-							};
-					}
-
-					if ((typeof opt === 'undefined' ? 'undefined' : _typeof(opt)) === 'object') {
-
-							jsonStr = JSON.stringify(opt);
-					};
-
-					// 尝试调用三端方法
-					try {
-							//ios
-
-							window[fnName](jsonStr);
-					} catch (e) {
-
-							// console.log(e);
-
-							try {
-									// android
-
-									window.android[fnName](jsonStr);
-							} catch (e) {
-									// browser
-
-									if (f.debug) {
-											// 如果开启了调试模式, 则打印错误信息
-
-											console.log(e);
-											console.log(fnName);
-									}
-
-									if (opt && typeof opt.error === 'function') {
-											opt.error(fnName);
-									}
-							}
-					}
-			};
-
-			// 展示当前Fph里面所有的方法名
-			Fph.prototype.toString = function () {
-
-					var f = this;
-					return f.jsBridge;
-			};
-
-			window.fph = new Fph();
-	})(window, document);
 
 /***/ }
 /******/ ]);

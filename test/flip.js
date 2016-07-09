@@ -11,14 +11,14 @@ module.exports = function(req, res, next) {
 		"returnObject": {
 			"has_flip": 1,
 			"msg": "已经违规, 但是可以换一张",
-			"is_can_flip": 1,
-			"flip_img": "aa.jpg",
-			"gift_img": "bb.jpg",
-			"flip_model": 1,
-			"is_invalid": 1,
-			"surplus_times": 1,
-			"flip_rule": "活动规则",
-			"offer": "提供方",
+			"is_can_flip": 1, // 是否可翻牌
+			"flip_img": "/assets/img/house.jpg",
+			"gift_img": "/assets/img/gift.jpg",
+			"flip_model": 2,
+			"is_invalid": 2,
+			"surplus_times": 4, // 剩余天数
+			"flip_rule": "每天翻一次，有惊喜哦，连续翻完所有拼图后，有机会赢得大奖！",
+			"offer": "合景叠彩园",
 			"pid": 129,
 			"property_name": "楼盘名",
 			"is_change": 1,

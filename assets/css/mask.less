@@ -24,6 +24,7 @@
 		opacity: 0;
 		.mask-close { // 增大点击区域
 			.absolute(0, 0, _, _);
+			z-index: 9;
 			width: 60px;
 			text-align: center;
 			img {width: 20px;}
@@ -62,23 +63,21 @@
 	}
 	.mask-loading { // ajax loading
 		.size(100%);
+		.absolute(0, _, _, 0);
+		z-index: 16;
 		display: none;
 		.mask-img-wrap {
 			.size(100%);
 			padding-top: 0;
 			margin: auto;
 			position: relative;
-			// img {
-			// 	.absolute(0, 0, 0, 0);
-			// 	width: 20%;
-			// }
 		}
 	}
 	.mask-dialog { // 弹框
 		.size(100%);
+		.absolute(0,_,_,0);
 		max-width: 550px;
 		margin: auto;
-		position: relative;
 		display: none;
 		.dialog-box {
 			.absolute(50%, _, _, 50%);

@@ -11,6 +11,8 @@ fph.config({
 		'closeViewPage', // 关闭当前webview
 		'goToProperty', // 跳转楼盘详情
 		'goToLogin', // 调用登录面板
+		'goToIndex', // 跳转首页
+		'goToGift' // 跳转礼券页面
 	]
 });
 
@@ -66,4 +68,14 @@ function goToLogin() {
 
 }
 
-module.exports = {getInfo, closePage, goToProperty, goToLogin};
+// 跳转回首页
+function goToIndex() {
+	fph.goToIndex();
+}
+
+// 跳转我的礼券
+function goToGift() {
+	fph.goToGift();
+}
+
+module.exports = {getInfo, closePage, goToProperty, goToLogin, goToIndex, goToGift};

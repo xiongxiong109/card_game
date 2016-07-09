@@ -58,3 +58,60 @@
 		.box-shadow(0px 0px 0px 2px #ffe53b);
 	}
 }
+
+// 弹跳摇摆走出来
+@-webkit-keyframes bounceInShake {
+
+	0% {
+		-webkit-transform: rotateZ(12deg) scale(0);
+	}
+	
+	40% {
+		-webkit-transform: rotateZ(-5deg) scale(1.2);
+	}
+	
+	60% {
+		-webkit-transform: rotateZ(0deg) scale(1);
+	}
+
+	70% {
+		-webkit-transform: rotateZ(-8deg) scale(1);
+	}
+
+	80% {
+		-webkit-transform: rotateZ(8deg) scale(1);
+	}
+
+	100% {
+		-webkit-transform: rotateZ(0deg) scale(1);
+	}
+
+}
+
+@keyframes bounceInShake {
+
+	0% {
+		transform: rotateZ(12deg) scale(0);
+	}
+	
+	40% {
+		transform: rotateZ(-5deg) scale(1.2);
+	}
+	
+	60% {
+		transform: rotateZ(0deg) scale(1);
+	}
+
+	70% {
+		transform: rotateZ(-8deg) scale(1);
+	}
+
+	80% {
+		transform: rotateZ(8deg) scale(1);
+	}
+
+	100% {
+		transform: rotateZ(0deg) scale(1);
+	}
+	
+}
