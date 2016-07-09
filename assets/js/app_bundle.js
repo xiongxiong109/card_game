@@ -666,7 +666,10 @@
 									var _ajax = $.extend({}, o.ajaxApi.clickFlip, {
 
 											data: {
-													uId: o.uId
+													t: o.userInfo.t,
+													_t: o.userInfo._t,
+													flip_id: o.flipInfo.flip_id,
+													city: o.userInfo.city
 											},
 
 											success: function success(data) {

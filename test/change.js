@@ -16,11 +16,12 @@ module.exports = function(req, res, next) {
         "flip_model":2,
         "surplus_times":4,
         "flip_rule":"活动规则",
-        "offer":"提供方",
+        "offer":"房品汇",
         "pid": 129,
         "property_name": "楼盘名",
         "is_change":2,
-        "flip_id":1
+        "flip_id":3,
+        "is_can_flip": 1
     }
 	};
 
