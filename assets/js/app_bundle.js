@@ -190,6 +190,7 @@
 
 					this.opt = opt;
 					this.binded = false; // 单例绑定事件, 当第一次执行bindEvents的时候, 将该值置为true, 从此以后将再也无法重复绑定事件
+					this.isChanging = false; // 换一张按钮防止多次点击
 					// 引入app交互方法
 					this.Act = __webpack_require__(2);
 
@@ -241,6 +242,9 @@
 									// 渲染活动规则与大奖提供方等等
 
 									_this.renderTxt();
+
+									// 解冻换一张按钮
+									_this.isChanging = false;
 
 									// 状态机
 									if (flipInfo.has_flip == 1) {
@@ -659,8 +663,14 @@
 							d.$cardList.delegate('.can-flip', 'tap', function () {
 
 									var $self = $(this);
-
 									$self.removeClass('can-flip');
+
+									if (!_this.opt.userInfo.isLogined) {
+											// 如果用户未登录, 打开app的登录面板
+
+											_this.Act.goToLogin();
+											return false;
+									}
 
 									// 签到ajax配置
 									var _ajax = $.extend({}, o.ajaxApi.clickFlip, {
@@ -860,7 +870,6 @@
 															_this.clearAndRestart();
 													}
 											}
-
 									});
 
 									// 如果用户已经翻过牌(剩余天数小于总天数, 则认为翻过牌)
@@ -871,10 +880,23 @@
 													confirmTxt: '是的',
 													cancelTxt: '算了',
 													confirm: function confirm() {
-															$.ajax(_ajax);
+
+															if (!_this.isChanging) {
+
+																	_this.isChanging = true;
+																	$.ajax(_ajax);
+															}
 													}
 
 											});
+									} else {
+											// 否则, 点击后直接进行切换
+
+											if (!_this.isChanging) {
+
+													_this.isChanging = true;
+													$.ajax(_ajax);
+											}
 									}
 							});
 					}
@@ -1161,6 +1183,7 @@
 	function getInfo(cb) {
 
 		var rst = {
+			isLogined: true,
 			t: '1f3s2df13sd', // 密钥
 			_t: 'fasd132asd', // 用户登录密钥
 			city: '上海市', // 选择城市

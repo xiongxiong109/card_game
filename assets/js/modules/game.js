@@ -6,6 +6,7 @@ class Game {
 
 		this.opt = opt;
 		this.binded = false; // 单例绑定事件, 当第一次执行bindEvents的时候, 将该值置为true, 从此以后将再也无法重复绑定事件
+		this.isChanging = false; // 换一张按钮防止多次点击
 		// 引入app交互方法
 		this.Act = require('./fphAppAction');
 
@@ -52,6 +53,9 @@ class Game {
 
 			// 渲染活动规则与大奖提供方等等
 			_this.renderTxt();
+
+			// 解冻换一张按钮
+			_this.isChanging = false;
 
 			// 状态机
 			if (flipInfo.has_flip == 1) { // 有有效活动
@@ -468,8 +472,14 @@ class Game {
 		d.$cardList.delegate('.can-flip', 'tap', function() {
 
 			let $self = $(this);
-
 			$self.removeClass('can-flip');
+
+			if (!_this.opt.userInfo.isLogined) { // 如果用户未登录, 打开app的登录面板
+
+				_this.Act.goToLogin();
+				return false;
+
+			}
 
 			// 签到ajax配置
 			let _ajax = $.extend({}, o.ajaxApi.clickFlip, {
@@ -672,7 +682,7 @@ class Game {
 					lt: o.userInfo.lt
 				},
 
-				success: function(data) {
+				success(data) {
 
 					// 清空记录, 刷新翻牌
 					let {returnObject} = data;
@@ -697,10 +707,26 @@ class Game {
 					confirmTxt: '是的',
 					cancelTxt: '算了',
 					confirm: function() {
-						$.ajax(_ajax);
+						
+						if (!_this.isChanging) {
+
+							_this.isChanging = true;
+							$.ajax(_ajax);
+
+						}
+
 					}
 
 				});
+
+			} else { // 否则, 点击后直接进行切换
+
+				if (!_this.isChanging) {
+
+					_this.isChanging = true;
+					$.ajax(_ajax);
+
+				}
 
 			}
 
