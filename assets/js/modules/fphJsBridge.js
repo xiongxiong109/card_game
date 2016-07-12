@@ -38,6 +38,7 @@
 
 			Fph.prototype[ele] = function(opt) {
 
+				var opt = opt || {};
 				// 每一个方法的执行兼容ios与android的方法
 				var fnName = [prefix, ele].join('');
 				f.facadeRunBridge(fnName, opt);
@@ -99,7 +100,17 @@
 
 			try { // android
 
-				window.android[fnName](jsonStr);
+				var toJSON = JSON.parse(jsonStr);
+
+				if (Object.keys(toJSON).length) { // 有参数传入
+
+					window.android[fnName](jsonStr);
+
+				} else { // 无参数传入
+
+					window.android[fnName]();
+
+				}
 
 			} catch(e) { // browser
 
