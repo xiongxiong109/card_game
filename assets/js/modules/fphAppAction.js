@@ -19,8 +19,10 @@ fph.config({
 // 获取用户信息
 function getInfo(cb) {
 	
+	var rand = Math.random();
+	rand = rand < 0.5 ? true : false;
 	var rst = {
-		isLogined: true,
+		isLogined: rand,
 		t: '1f3s2df13sd', // 密钥
 		_t: 'fasd132asd', // 用户登录密钥
 		city: '上海市', // 选择城市

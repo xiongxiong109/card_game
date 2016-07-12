@@ -211,6 +211,8 @@ class Game {
 				flip_id: o.flipInfo.flip_id
 			},
 
+			timeout: 2000,
+
 			success: function(data) {
 
 				var returnObj = data.returnObject;
@@ -225,6 +227,7 @@ class Game {
 
 		});
 
+		// _this.Act.closePage();
 		$.ajax(_ajax);
 
 	}
@@ -474,81 +477,79 @@ class Game {
 			let $self = $(this);
 			$self.removeClass('can-flip');
 
-			if (!_this.opt.userInfo.isLogined) { // 如果用户未登录, 打开app的登录面板
+			// 更新用户登录信息
+			_this.Act.getInfo(function(info) {
 
-				_this.Act.goToLogin();
-				return false;
+				// 签到ajax配置
+				let _ajax = $.extend({}, o.ajaxApi.clickFlip, {
 
-			}
+					data: {
+						t: o.userInfo.t, 
+						_t: o.userInfo._t,
+						flip_id: o.flipInfo.flip_id,
+						city: o.userInfo.city
+					},
 
-			// 签到ajax配置
-			let _ajax = $.extend({}, o.ajaxApi.clickFlip, {
+					success: function(data) {
 
-				data: {
-					t: o.userInfo.t, 
-					_t: o.userInfo._t,
-					flip_id: o.flipInfo.flip_id,
-					city: o.userInfo.city
-				},
+						let {returnObject} = data;
 
-				success: function(data) {
+						if (!$.isEmptyObject(returnObject)) {
 
-					let {returnObject} = data;
-
-					if (!$.isEmptyObject(returnObject)) {
-
-						if (returnObject.is_invalid == 1) { // 活动已失效
-
-							_this.showDialog({
-
-								txt: `<p>${returnObject.msg}</p>`,
-								confirmOnly: true,
-								confirmTxt: '朕知道了',
-								confirm: function() {
-
-									$self.addClass('can-flip');
-
-								}
-
-							});
-
-						} else { // 活动还没失效
-
-							if (returnObject.is_change == 1) { // 需要切换城市
+							if (returnObject.is_invalid == 1) { // 活动已失效
 
 								_this.showDialog({
 
-									txt: '<p>当前城市与上次翻牌城市不一致!</p><p>是否切换回翻牌城市继续翻牌?</p>',
-									confirmOnly: false,
-									confirmTxt: '切换',
-									cancelTxt: '否',
-									confirm: function() { // 关闭翻牌webview, 回首页
-										_this.Act.goToIndex();
-									},
-									cancel: function() { // 不做任何处理
+									txt: `<p>${returnObject.msg}</p>`,
+									confirmOnly: true,
+									confirmTxt: '朕知道了',
+									confirm: function() {
+
 										$self.addClass('can-flip');
+
 									}
 
 								});
 
-							} else { 
-								
-								if (returnObject.is_can_flip == 1) { // 可以翻牌
+							} else { // 活动还没失效
 
-									// 渲染抽奖结果
-									_this.renderRst(returnObject);
-									// 对该块进行动画操作
-									_this.AnimateGoRotate($self);
-									// 计算剩余天数
-									o.flipInfo.surplus_times--;
-									_this.countDisDay();
-
-								} else {
+								if (returnObject.is_change == 1) { // 需要切换城市
 
 									_this.showDialog({
-										txt: `<p>你今天已经翻过牌啦, 明天再过来吧</p>`,
-										confirmOnly: true
+
+										txt: '<p>当前城市与上次翻牌城市不一致!</p><p>是否切换回翻牌城市继续翻牌?</p>',
+										confirmOnly: false,
+										confirmTxt: '切换',
+										cancelTxt: '否',
+										confirm: function() { // 关闭翻牌webview, 回首页
+											_this.Act.goToIndex();
+										},
+										cancel: function() { // 不做任何处理
+											$self.addClass('can-flip');
+										}
+
 									});
+
+								} else { 
+									
+									if (returnObject.is_can_flip == 1) { // 可以翻牌
+
+										// 渲染抽奖结果
+										_this.renderRst(returnObject);
+										// 对该块进行动画操作
+										_this.AnimateGoRotate($self);
+										// 计算剩余天数
+										o.flipInfo.surplus_times--;
+										_this.countDisDay();
+
+									} else {
+
+										_this.showDialog({
+											txt: `<p>你今天已经翻过牌啦, 明天再过来吧</p>`,
+											confirmOnly: true
+										});
+
+									}
 
 								}
 
@@ -556,36 +557,41 @@ class Game {
 
 						}
 
+					},
+
+					error: function(xhr, status, err) {
+
+						_this.showDialog({
+
+							txt: `<p>${err}</p>`,
+							confirmOnly: true,
+							confirm: function() {
+
+								$self.addClass('can-flip');
+
+							}
+						});
+
 					}
 
-				},
+				});
 
-				error: function(xhr, status, err) {
+				$.extend(_this.opt.userInfo, info);
 
-					_this.showDialog({
+				if (!_this.opt.userInfo.isLogined) { // 如果用户未登录, 打开app的登录面板
+					
+					$self.addClass('can-flip');
+					_this.Act.goToLogin();
+					return false;
 
-						txt: `<p>${err}</p>`,
-						confirmOnly: true,
-						confirm: function() {
+				} else {
 
-							$self.addClass('can-flip');
-
-						}
-					});
+					// ajax签到抽奖
+					$.ajax(_ajax);
 
 				}
 
 			});
-
-			// 对该块进行动画操作
-			// _this.AnimateGoRotate($self);
-
-			// 计算剩余天数
-			// o.flipInfo.surplus_times--;
-			// _this.countDisDay();
-
-			// ajax签到抽奖
-			$.ajax(_ajax);
 
 		});
 
