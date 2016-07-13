@@ -22,105 +22,121 @@ var gameConfig = Config;
 
 { // 翻牌游戏
 
-	// 先通过app异步获取用户基本信息
-	Act.getInfo(function(rst) {
+	$(document).ready(function() {
 
-		// 将用户信息扩展到gameConfig.userInfo上去
-		$.extend(gameConfig.userInfo, rst);
+		setTimeout(function() {
 
-		$(".loading-wrap").css('background-color', 'rgba(33, 33, 33, 0.5)');
+			bootStrap();
 
-		// 初始化ajax加载失败提示, 做好容错处理
-		let $failWrap = $(".fail-wrap");
+		}, 500);
 
-		// 点击按钮重新请求
-		$failWrap.delegate('.reload-btn', 'tap', function(e) {
+	});
 
-			e.preventDefault();
+	function bootStrap() {
 
-			_hideError(function() {
+		// 先通过app异步获取用户基本信息
+		Act.getInfo(function(rst) {
+
+			alert(JSON.stringify(rst));
+
+			// 将用户信息扩展到gameConfig.userInfo上去
+			$.extend(gameConfig.userInfo, rst);
+
+			$(".loading-wrap").css('background-color', 'rgba(33, 33, 33, 0.5)');
+
+			// 初始化ajax加载失败提示, 做好容错处理
+			let $failWrap = $(".fail-wrap");
+
+			// 点击按钮重新请求
+			$failWrap.delegate('.reload-btn', 'tap', function(e) {
+
+				e.preventDefault();
+
+				_hideError(function() {
+					
+					setTimeout(function() {
+
+						$.ajax(_ajax);
+
+					}, 300);
+
+				});
 				
-				setTimeout(function() {
-
-					$.ajax(_ajax);
-
-				}, 300);
-
 			});
-			
-		});
 
-		// 根据用户信息获取用户活动信息
-		var _ajax = $.extend({}, gameConfig.ajaxApi.info, {
+			// 根据用户信息获取用户活动信息
+			var _ajax = $.extend({}, gameConfig.ajaxApi.info, {
 
-			data: rst,
-			success: function(data) { // 拿到翻牌信息
-				
-				// 将翻牌信息扩展到gameConfig的flipInfo信息上
-				if (!$.isEmptyObject(data.returnObject)) {
+				data: rst,
+				success: function(data) { // 拿到翻牌信息
+					
+					// 将翻牌信息扩展到gameConfig的flipInfo信息上
+					if (!$.isEmptyObject(data.returnObject)) {
 
-					$.extend(gameConfig.flipInfo, data.returnObject);
+						$.extend(gameConfig.flipInfo, data.returnObject);
 
-					// 确保信息无误后, 启动游戏
-					let cardGame = new Game(gameConfig);
+						// 确保信息无误后, 启动游戏
+						let cardGame = new Game(gameConfig);
 
-					cardGame.init();
+						cardGame.init();
 
-					// 添加窗口尺寸变化监听
-					$(window).on('resize', function() {
+						// 添加窗口尺寸变化监听
+						$(window).on('resize', function() {
 
-						cardGame.reStyleCardItems(gameConfig.flipInfo.flip_model, gameConfig.flipInfo.flip_img);
+							cardGame.reStyleCardItems(gameConfig.flipInfo.flip_model, gameConfig.flipInfo.flip_img);
 
-					});
+						});
 
-				} else {
+					} else {
 
+						_showError();
+
+					}
+
+				},
+				error: function(xhr, status, err) {
 					_showError();
-
 				}
 
-			},
-			error: function(xhr, status, err) {
-				_showError();
+			});
+
+			$.ajax(_ajax);
+
+			function _showError() {
+
+				$failWrap.animate({
+
+					'left': '100%',
+
+				}, 0, function() {
+
+					$failWrap.show()
+					.animate({
+						'left': 0
+					}, 300, 'ease');
+
+				});
+
+			}
+
+
+			function _hideError(fn) {
+
+				$failWrap.animate({
+
+					'left': '100%'
+
+				}, 300, 'ease', function() {
+
+					$failWrap.hide();
+					fn && fn();
+
+				});
+
 			}
 
 		});
 
-		$.ajax(_ajax);
-
-		function _showError() {
-
-			$failWrap.animate({
-
-				'left': '100%',
-
-			}, 0, function() {
-
-				$failWrap.show()
-				.animate({
-					'left': 0
-				}, 300, 'ease');
-
-			});
-
-		}
-
-
-		function _hideError(fn) {
-
-			$failWrap.animate({
-
-				'left': '100%'
-
-			}, 300, 'ease', function() {
-
-				$failWrap.hide();
-				fn && fn();
-
-			});
-
-		}
-
-	});
+	}
 
 }

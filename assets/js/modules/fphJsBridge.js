@@ -64,7 +64,9 @@
 
 				var args = Array.prototype.slice.call(arguments);
 
-				opt.success.apply(this, args);
+				// 将传入的参数数组数据通通转为json数组
+				var objArr = f.toJSONArr(args);
+				opt.success.apply(this, objArr);
 
 			};
 
@@ -77,7 +79,8 @@
 
 				var args = Array.prototype.slice.call(arguments);
 
-				opt.error.apply(this, args);
+				var objArr = f.toJSONArr(args);
+				opt.error.apply(this, objArr);
 
 			};
 
@@ -128,6 +131,24 @@
 			}
 
 		}
+
+	}
+
+	// 将一个数组中所有的元素
+	Fph.prototype.toJSONArr = function(args) {
+		
+		args.map(function(ele, idx) { // 如果是一个json格式的字符串
+
+			if (typeof ele === 'string') {
+				try {
+					args[idx] = JSON.parse(ele);
+				} catch(e) {
+					console.log(e);
+				}
+			}
+		});
+
+		return args;
 
 	}
 
