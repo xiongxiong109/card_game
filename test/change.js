@@ -9,7 +9,8 @@ module.exports = function(req, res, next) {
     "msg": "OK",
     "returnValue": "",
     "returnObject":{
-        "has_flip":1,
+        "has_flip": 1,
+        "is_invalid": 1,
         "msg":"",
         "flip_img":"/assets/img/gift.jpg",
         "gift_img":"/assets/img/house.jpg",

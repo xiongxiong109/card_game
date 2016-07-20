@@ -695,9 +695,24 @@ class Game {
 
 					if (!$.isEmptyObject(returnObject)) {
 
-						// 重置游戏数据
-						$.extend(o.flipInfo, returnObject);
-						_this.clearAndRestart();
+						console.log(returnObject);
+
+						if (returnObject.is_invalid == 0) { // 翻牌没有失效
+
+							// 重置游戏数据
+							$.extend(o.flipInfo, returnObject);
+							_this.clearAndRestart();
+
+						} else {
+
+							_this.showDialog({
+
+								txt: returnObject.msg,
+								confirmOnly: true
+
+							});
+
+						}
 
 					} 
 
