@@ -126,7 +126,7 @@ class Game {
 							confirm: function() {
 								// 点击后重新翻牌
 								_this.changeAnotherCard({type: 2});
-								
+
 							}
 
 						});
@@ -208,10 +208,18 @@ class Game {
 
 		} else {
 
-			if (obj.gift.type == 1) { // 礼品券
-				d.$rstImg[0].className = 'suprise-icon icon-sale';
-			} else if (obj.gift.type == 2) { // 路费宝
-				d.$rstImg[0].className = 'suprise-icon icon-hongbao';
+			if (obj.is_over == 1) { // 活动已结束, 这是最后一张牌, 应该展示大奖
+
+				d.$rstImg[0].className = 'suprise-icon icon-special';
+
+			} else {
+
+				if (obj.gift.type == 1) { // 礼品券
+					d.$rstImg[0].className = 'suprise-icon icon-sale';
+				} else if (obj.gift.type == 2) { // 路费宝
+					d.$rstImg[0].className = 'suprise-icon icon-hongbao';
+				}
+
 			}
 			
 			d.$maskRstWrap.html(`

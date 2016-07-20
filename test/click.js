@@ -13,7 +13,7 @@ module.exports = function(req, res, next) {
         "is_invalid": 2,
         "had_gift": 1,
         "is_can_flip": 1,
-        "is_over": 1,
+        "is_over": 2,
         "msg": "活动已失效",
         "gift": {
            "img": "aa.jpg", // 礼品图

@@ -15,8 +15,8 @@ module.exports = function(req, res, next) {
 			"flip_img": "/assets/img/house.jpg",
 			"gift_img": "/assets/img/gift.jpg",
 			"flip_model": 3,
-			"is_invalid": 4,
-			"surplus_times": 1, // 剩余天数
+			"is_invalid": 0,
+			"surplus_times": 3, // 剩余天数
 			"flip_rule": "每天翻一次，有惊喜哦，连续翻完所有拼图后，有机会赢得大奖！",
 			"offer": "合景叠彩园",
 			"pid": 129,
