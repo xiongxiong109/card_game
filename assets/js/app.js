@@ -1,6 +1,9 @@
 // zepto
 require('zepto');
 
+// 设置headers
+$.ajaxSettings.headers = {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')};
+
 // resize模块, 动态计算页面尺寸
 require('./modules/resize');
 
@@ -37,7 +40,7 @@ var gameConfig = Config;
 		// 先通过app异步获取用户基本信息
 		Act.getInfo(function(rst) {
 
-			alert(JSON.stringify(rst));
+			// alert(JSON.stringify(rst));
 
 			// 将用户信息扩展到gameConfig.userInfo上去
 			$.extend(gameConfig.userInfo, rst);
