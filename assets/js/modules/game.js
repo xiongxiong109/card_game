@@ -60,51 +60,78 @@ class Game {
 			// 状态机
 			if (flipInfo.has_flip == 1) { // 有有效活动
 
-				if (flipInfo.is_invalid == 1) { // 已经违规
+				if (flipInfo.is_change == 1) { // 有换一张
 
-					if (flipInfo.is_change == 1) { // 已经违规, 但是可以换一张
+					d.$switchCard.show();
+
+				} else { // 没有换一张
+
+					d.$switchCard.remove();
+
+				}
+
+				if (flipInfo.is_invalid == 0) { // 没有违规, 可继续翻牌, 走正常的翻牌初始化
+
+					_this.createCardPanel();
+
+				} else { // 已经违规 1,2,3,4
+
+					// console.log(_this.opt.flipInfo);
+					if (flipInfo.is_invalid == 1) { // 无法完成, 但是可以换一张;
 
 						_this.showDialog({
-							txt: '<p>很遗憾，您已无法完成翻牌活动，换一张试试~</p>',
-							confirmTxt: '好的',
-							cancelTxt: '算了',
-
+							txt: `<p>${flipInfo.msg}</p>`,
+							confirmOnly:true,
 							confirm: function() {
 
-								d.$switchCard.show();
+								// 点击确定后, 直接换一张
+								_this.changeAnotherCard({type: 1});
 
+							}
+						});
+
+					} else if (flipInfo.is_invalid == 2) { // 无法完成,活动结束
+
+						_this.showDialog({
+
+							txt: `<p>${flipInfo.msg}</p>`,
+							confirmOnly: true
+
+						});
+
+					} else if (flipInfo.is_invalid == 3) { // 无法完成,重新翻牌或换一张
+
+						_this.showDialog({
+
+							txt: `<p>${flipInfo.msg}</p>`,
+							confirmTxt: '重新翻牌',
+							cancelTxt: '换一张',
+							confirm: function() {
+								// type = 2: 重新翻牌
+								_this.changeAnotherCard({type: 2});
 							},
-
 							cancel: function() {
-								// 退出翻牌
-								_this.exitFlip();
+								// type = 1: 换一张
+								_this.changeAnotherCard({type: 1});
 							}
 
 						});
 
-					} else { // 已经违规并且不可换一张了, 提示
-
-						d.$switchCard.remove();
+					} else if (flipInfo.is_invalid == 4) { // 无法完成,重新翻牌
 
 						_this.showDialog({
-							txt: '<p>很遗憾，您已无法完成翻牌活动，活动结束~</p>',
-							confirmOnly: true,
-							confirmTxt: '朕知道了'
+
+							txt: `<p>${flipInfo.msg}</p>`,
+							confirmOnly:true,
+							confirm: function() {
+								// 点击后重新翻牌
+								_this.changeAnotherCard({type: 2});
+								
+							}
+
 						});
 
 					}
-
-				} else { // 没有违规, 可继续翻牌, 走正常的翻牌初始化
-
-					if (flipInfo.is_change == 1) { // 如果可以换一张
-
-						d.$switchCard.show();
-
-					} else {
-						d.$switchCard.remove();
-					}
-
-					_this.createCardPanel();
 
 				}
 
@@ -120,6 +147,8 @@ class Game {
 				});
 
 			}
+
+			_this.bindEvents();
 
 		});
 
@@ -319,8 +348,6 @@ class Game {
 			d.$cardList.css({
 				'background-image': `url(${bgImg})`
 			});
-
-			_this.bindEvents();
 
 		});
 
@@ -676,84 +703,95 @@ class Game {
 		// 换一张
 		d.$mainWrap.delegate('.switch-card', 'tap', function() {
 
-			// 构造ajax请求
-			var _ajax = $.extend({}, o.ajaxApi.change, {
+			_this.changeAnotherCard({type: 1});
 
-				data: {
-					t: o.userInfo.t,
-					_t: o.userInfo._t,
-					flip_id: o.flipInfo.flip_id,
-					city: o.userInfo.city,
-					current_city: o.userInfo.current_city,
-					lt: o.userInfo.lt
-				},
+		});
+	}
 
-				success(data) {
+	// 换一张ajax
+	changeAnotherCard(obj) {
 
-					// 清空记录, 刷新翻牌
-					let {returnObject} = data;
+		var _this = this;
+		var d = _this.doms;
+		var o = _this.opt;
+		var type = obj.type || 1; // 根据传入的type是1 还是2 来判断是换一张还是重新开始
 
-					if (!$.isEmptyObject(returnObject)) {
+		// 换一张配置
+		var _ajax = $.extend({}, o.ajaxApi.change, {
 
-						console.log(returnObject);
+			data: {
+				t: o.userInfo.t,
+				_t: o.userInfo._t,
+				flip_id: o.flipInfo.flip_id,
+				city: o.userInfo.city,
+				current_city: o.userInfo.current_city,
+				lt: o.userInfo.lt,
+				type: type
+			},
 
-						if (returnObject.is_invalid == 0) { // 翻牌没有失效
+			success(data) {
 
-							// 重置游戏数据
-							$.extend(o.flipInfo, returnObject);
-							_this.clearAndRestart();
+				// 清空记录, 刷新翻牌
+				_this.isChanging = false;
+				let {returnObject} = data;
+				if (!$.isEmptyObject(returnObject)) {
 
-						} else {
+					// console.log(returnObject);
 
-							_this.showDialog({
+					if (returnObject.is_invalid == 0) { // 翻牌没有失效
 
-								txt: returnObject.msg,
-								confirmOnly: true
+						// 重置游戏数据
+						$.extend(o.flipInfo, returnObject);
+						_this.clearAndRestart();
 
-							});
+					} else {
+						
+						_this.showDialog({
 
-						}
+							txt: `<p>${returnObject.msg}</p>`,
+							confirmOnly: true
 
-					} 
+						});
+
+					}
+
+				} 
+
+			}
+
+		});
+
+		// 如果用户已经翻过牌(剩余天数小于总天数, 则认为翻过牌)
+		if( parseInt(o.flipInfo.surplus_times) < Math.pow(parseInt(o.flipInfo.flip_model), 2) ) {
+
+			_this.showDialog({
+				txt: '<p>您之前的翻牌记录将被重置，下次将重头开始，确认要换一张吗?</p>',
+				confirmTxt: '是的',
+				cancelTxt: '算了',
+				confirm: function() {
+					
+					if (!_this.isChanging) {
+
+						_this.isChanging = true;
+						$.ajax(_ajax);
+
+					}
 
 				}
 
 			});
 
-			// 如果用户已经翻过牌(剩余天数小于总天数, 则认为翻过牌)
-			if( parseInt(o.flipInfo.surplus_times) < Math.pow(parseInt(o.flipInfo.flip_model), 2) ) {
+		} else { // 否则, 点击后直接进行切换
 
-				_this.showDialog({
-					txt: '<p>您之前的翻牌记录将被重置，下次将重头开始，确认要换一张吗?</p>',
-					confirmTxt: '是的',
-					cancelTxt: '算了',
-					confirm: function() {
-						
-						if (!_this.isChanging) {
+			if (!_this.isChanging) {
 
-							_this.isChanging = true;
-							$.ajax(_ajax);
-
-						}
-
-					}
-
-				});
-
-			} else { // 否则, 点击后直接进行切换
-
-				if (!_this.isChanging) {
-
-					_this.isChanging = true;
-					$.ajax(_ajax);
-
-				}
+				_this.isChanging = true;
+				$.ajax(_ajax);
 
 			}
 
-		});
+		}
 	}
-
 	// 清空记录, 重新翻牌
 	clearAndRestart() {
 
@@ -937,7 +975,8 @@ class Game {
 			_animateHideDialog(function() {
 
 				opt.confirm && opt.confirm();
-
+				opt.confirm = null;
+				opt.cancel = null;
 			});
 
 		});
@@ -947,6 +986,8 @@ class Game {
 			_animateHideDialog(function() {
 
 				opt.cancel && opt.cancel();
+				opt.confirm = null;
+				opt.cancel = null;
 
 			});
 

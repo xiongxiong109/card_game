@@ -10,13 +10,13 @@ module.exports = function(req, res, next) {
 		"returnValue": "",
 		"returnObject": {
 			"has_flip": 1,
-			"msg": "已经违规, 但是可以换一张",
+			"msg": "无法完成,重新翻牌",
 			"is_can_flip": 1, // 是否可翻牌
 			"flip_img": "/assets/img/house.jpg",
 			"gift_img": "/assets/img/gift.jpg",
 			"flip_model": 3,
-			"is_invalid": 2,
-			"surplus_times": 8, // 剩余天数
+			"is_invalid": 4,
+			"surplus_times": 1, // 剩余天数
 			"flip_rule": "每天翻一次，有惊喜哦，连续翻完所有拼图后，有机会赢得大奖！",
 			"offer": "合景叠彩园",
 			"pid": 129,
