@@ -252,6 +252,18 @@ class Game {
 
 			success: function(data) {
 
+				// 判断退出接口是否正常
+				if (data.status != 200) {
+
+					_this.showDialog({
+						txt: `<p>${data.msg}</p>`,
+						confirmOnly:true
+					});
+
+					return false;
+
+				}
+
 				var returnObj = data.returnObject;
 
 				if (!$.isEmptyObject(returnObj)) {
@@ -527,6 +539,21 @@ class Game {
 
 					success: function(data) {
 
+						// 判断签到程序是否正常
+						if (data.status != 200) {
+
+							_this.showDialog({
+								txt: `<p>${data.msg}</p>`,
+								confirmOnly: true,
+								confirm: function() {
+									$self.addClass('can-flip');
+								}
+							});
+
+							return false;
+
+						}
+
 						let {returnObject} = data;
 
 						if (!$.isEmptyObject(returnObject)) {
@@ -738,6 +765,21 @@ class Game {
 			},
 
 			success(data) {
+
+				// 点击换一张时判断是否正确处理
+				if (data.status != 200) {
+
+					_this.showDialog({
+						txt: `<p>${data.msg}</p>`,
+						confirmOnly: true,
+						confirm: function() {
+							_this.isChanging = false;
+						}
+					});
+
+					return false;
+
+				}
 
 				// 清空记录, 刷新翻牌
 				_this.isChanging = false;

@@ -72,7 +72,15 @@ var gameConfig = Config;
 
 				data: rst,
 				success: function(data) { // 拿到翻牌信息
-					
+
+					// 判断拿到用户信息是否正常
+					if (data.status != 200) {
+
+						_showError();
+						return false;
+
+					}
+
 					// 将翻牌信息扩展到gameConfig的flipInfo信息上
 					if (!$.isEmptyObject(data.returnObject)) {
 

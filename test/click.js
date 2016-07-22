@@ -4,7 +4,7 @@ module.exports = function(req, res, next) {
 	var json = {
     "serverCode": 1,
     "errorCode": 200,
-    "status": 200,
+    "status": 404,
     "msgType": 1,
     "msg": "OK",
     "returnValue": "",
