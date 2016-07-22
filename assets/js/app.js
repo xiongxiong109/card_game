@@ -51,7 +51,7 @@ var gameConfig = Config;
 			let $failWrap = $(".fail-wrap");
 
 			// 点击按钮重新请求
-			$failWrap.delegate('.reload-btn', 'tap', function(e) {
+			$failWrap.undelegate('.reload-btn', 'tap').delegate('.reload-btn', 'tap', function(e) {
 
 				e.preventDefault();
 
@@ -59,7 +59,7 @@ var gameConfig = Config;
 					
 					setTimeout(function() {
 
-						$.ajax(_ajax);
+						bootStrap();
 
 					}, 300);
 
