@@ -22,29 +22,29 @@ function getInfo(cb) {
 	
 	// var rand = Math.random();
 	// rand = rand < 0.5 ? true : false;
-	var rst = {
-		isLogined: true,
-		t: '1f3s2df13sd', // 密钥
-		_t: 'fasd132asd', // 用户登录密钥
-		city: '上海市', // 选择城市
-		current_city: '北京市', // 当前城市
-		lt: '121.424712,31.176326'  // 定位经纬度
-	}
+	// var rst = {
+	// 	isLogined: true,
+	// 	t: '1f3s2df13sd', // 密钥
+	// 	_t: 'fasd132asd', // 用户登录密钥
+	// 	city: '上海市', // 选择城市
+	// 	current_city: '北京市', // 当前城市
+	// 	lt: '121.424712,31.176326'  // 定位经纬度
+	// }
 
 	// 调用app方法, 获取用户信息
-	// fph.getUserInfo({
+	fph.getUserInfo({
 
-	// 	success: function(data) {
-	// 		cb && cb(data);
-	// 	}
+		success: function(data) {
+			cb && cb(data);
+		}
 
-	// });
+	});
 
-	setTimeout(function() {
+	// setTimeout(function() {
 
-		cb && cb(rst);
+	// 	cb && cb(rst);
 		
-	}, 1000);
+	// }, 1000);
 
 }
 
