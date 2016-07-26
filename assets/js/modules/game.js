@@ -44,7 +44,6 @@ class Game {
 		var _this = this;
 		var d = _this.doms;
 		var o = _this.opt;
-
 		_this.hideInitLoading(function() {
 
 			_this.initAjaxConfig();
@@ -245,6 +244,7 @@ class Game {
 			data: {
 				t: o.userInfo.t,
 				_t: o.userInfo._t,
+				uid: o.flipInfo.uid,
 				flip_id: o.flipInfo.flip_id
 			},
 
@@ -533,6 +533,7 @@ class Game {
 					data: {
 						t: o.userInfo.t, 
 						_t: o.userInfo._t,
+						uid: o.flipInfo.uid,
 						flip_id: o.flipInfo.flip_id,
 						city: o.userInfo.city
 					},
@@ -757,6 +758,7 @@ class Game {
 			data: {
 				t: o.userInfo.t,
 				_t: o.userInfo._t,
+				uid: o.flipInfo.uid,
 				flip_id: o.flipInfo.flip_id,
 				city: o.userInfo.city,
 				current_city: o.userInfo.current_city,

@@ -40,8 +40,6 @@ var gameConfig = Config;
 		// 先通过app异步获取用户基本信息
 		Act.getInfo(function(rst) {
 
-			// alert(JSON.stringify(rst));
-
 			// 将用户信息扩展到gameConfig.userInfo上去
 			$.extend(gameConfig.userInfo, rst);
 

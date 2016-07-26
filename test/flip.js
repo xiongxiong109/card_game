@@ -4,12 +4,13 @@ module.exports = function(req, res, next) {
 	res.send({
 		"serverCode": 1,
 		"errorCode": 200,
-		"status": 404,
+		"status": 200,
 		"msgType": 1,
 		"msg": "OK",
 		"returnValue": "",
 		"returnObject": {
 			"has_flip": 1,
+			"uid": 1,
 			"msg": "无法完成,重新翻牌",
 			"is_can_flip": 1, // 是否可翻牌
 			"flip_img": "/assets/img/house.jpg",
