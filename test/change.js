@@ -10,7 +10,7 @@ module.exports = function(req, res, next) {
     "returnValue": "",
     "returnObject":{
         "has_flip": 1,
-        "is_invalid": 3,
+        "is_invalid": 1,
         "msg":"系统出错无法完成,重新翻牌或换一张",
         "flip_img":"/assets/img/gift.jpg",
         "gift_img":"/assets/img/house.jpg",

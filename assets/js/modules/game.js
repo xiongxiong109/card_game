@@ -750,7 +750,12 @@ class Game {
 		// 换一张
 		d.$mainWrap.delegate('.switch-card', 'tap', function() {
 
-			_this.changeAnotherCard({type: 1});
+			if (!_this.isChanging) {
+
+				_this.isChanging = true;
+				_this.changeAnotherCard({type: 1});
+
+			}
 
 		});
 	}
@@ -833,25 +838,18 @@ class Game {
 				cancelTxt: '算了',
 				confirm: function() {
 					
-					if (!_this.isChanging) {
-
-						_this.isChanging = true;
 						$.ajax(_ajax);
 
-					}
-
+				},
+				cancel: function() {
+					_this.isChanging = false;
 				}
 
 			});
 
 		} else { // 否则, 点击后直接进行切换
 
-			if (!_this.isChanging) {
-
-				_this.isChanging = true;
 				$.ajax(_ajax);
-
-			}
 
 		}
 	}
@@ -902,6 +900,7 @@ class Game {
 		let d = _this.doms;
 		let t = _this.timeLine;
 
+		_this.isChanging = true;
 		// 让卡片的层级处于所有卡片的最高等级
 		$card.css('z-index', Math.pow(_this.opt.flipInfo.flip_model, 2));
 
@@ -983,7 +982,12 @@ class Game {
 					'rotateX': '0',
 					'scale': 1
 
-				}, 400, 'cubic-bezier(.36,.66,.46,1.22)')
+				}, 400, 'cubic-bezier(.36,.66,.46,1.22)', function() {
+
+					// 翻牌过程中不能点击换一张按钮, 翻牌动画结束后解锁换一张按钮
+					_this.isChanging = false;
+
+				});
 
 			});
 		}
