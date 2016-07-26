@@ -218,7 +218,8 @@ class Game {
 				} else if (obj.gift.type == 2) { // 路费宝
 					d.$rstImg[0].className = 'suprise-icon icon-hongbao';
 				}
-
+				// 如果有奖励, 给按钮绑定奖励数据
+				d.$maskFnBtn.data('type', obj.gift.type);
 			}
 			
 			d.$maskRstWrap.html(`
@@ -713,10 +714,20 @@ class Game {
 
 		});
 
-		// 查看我的奖励, 点击后调用app方法, 跳转我的礼券页面
+		// 查看我的奖励, 点击后调用app方法, 根据礼品类型跳转不同的界面
 		d.$maskFnBtn.delegate('.check-gift-btn', 'tap', function() {
 			
-			_this.Act.goToGift();
+			var giftType = d.$maskFnBtn.data('type');
+
+			if (giftType == 1) { // 礼品券
+
+				_this.Act.goToGift();
+
+			} else if (giftType == 2) { // 路费宝
+
+				_this.Act.goToTravelMoney();
+
+			}
 
 		});
 

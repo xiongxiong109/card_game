@@ -4,7 +4,7 @@ module.exports = function(req, res, next) {
 	var json = {
     "serverCode": 1,
     "errorCode": 200,
-    "status": 404,
+    "status": 200,
     "msgType": 1,
     "msg": "OK",
     "returnValue": "",
@@ -17,8 +17,8 @@ module.exports = function(req, res, next) {
         "msg": "活动已失效",
         "gift": {
            "img": "aa.jpg", // 礼品图
-           "type": 2, // 礼品类型
-           "name": "礼品名" // 礼品名
+           "type": 1, // 礼品类型
+           "name": "鲁花花生油一瓶" // 礼品名
         }
     }
 	}
